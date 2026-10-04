@@ -1,0 +1,95 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email.lower() == "abdulahad.onr2@gmail.com" ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Connection health check
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Products Collection
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Categories Collection
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Site Settings Collection
+    match /siteSettings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      // Any customer can create an order (guest or authenticated)
+      allow create: if request.resource.data.totalAmount >= 0 &&
+                       request.resource.data.customerName is string &&
+                       request.resource.data.customerPhone is string &&
+                       request.resource.data.paymentMethod is string;
+      
+      // Allow single document lookup by Order ID for tracking
+      allow get: if true;
+
+      // Allow listing orders: admin can list all, logged-in user can list their own
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      // Only admins can update status or delete orders
+      allow update, delete: if isAdmin();
+    }
+
+    // Deposit Requests Collection
+    match /depositRequests/{requestId} {
+      allow create: if isSignedIn() &&
+                       request.resource.data.amount > 0 &&
+                       request.resource.data.paymentMethod is string &&
+                       request.resource.data.transactionId is string;
+      allow get: if true;
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Wallet Transactions Collection (Ledger)
+    match /walletTransactions/{txId} {
+      allow get, list: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Admins Collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
