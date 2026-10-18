@@ -1,10 +1,12 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/ThemeLanguageContext';
 
 export const Footer: React.FC = () => {
   const { siteSettings, navigateTo } = useStore();
   const { isAdmin } = useAuth();
+  const { isBangla, t } = useLanguage();
 
   return (
     <footer className="border-t border-slate-800 bg-[#050912] text-slate-400 text-sm">
@@ -24,50 +26,54 @@ export const Footer: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              {siteSettings.footerText ||
-                'বাংলাদেশের সবচেয়ে নির্ভরযোগ্য ডিজিটাল পণ্য ও ইনস্ট্যান্ট গেম টপআপ মার্কেটপ্লেস। ১০০% অফিশিয়াল ও নিরাপদ গেটওয়ে।'}
+              {isBangla
+                ? siteSettings.footerText ||
+                  'বাংলাদেশের সবচেয়ে নির্ভরযোগ্য ডিজিটাল পণ্য ও ইনস্ট্যান্ট গেম টপআপ মার্কেটপ্লেস। ১০০% অফিশিয়াল ও নিরাপদ গেটওয়ে।'
+                : 'Bangladesh’s most trusted marketplace for digital game top-ups and gift cards. 100% official and automated.'}
             </p>
             <div className="text-xs text-slate-500">
-              সার্বক্ষণিক ডিজিটাল অটোমেশন ও সিকিউর গেটওয়ে সংযুক্ত।
+              {isBangla
+                ? 'সার্বক্ষণিক ডিজিটাল অটোমেশন ও সিকিউর গেটওয়ে সংযুক্ত।'
+                : '24/7 automated delivery & secure payment gateway.'}
             </div>
           </div>
 
           {/* Col 2: Categories */}
           <div>
             <h4 className="font-heading font-bold text-white text-base mb-4">
-              ক্যাটাগরি সমূহ
+              {isBangla ? 'ক্যাটাগরি সমূহ' : 'Categories'}
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
                 <button
                   onClick={() => navigateTo('catalog', { categorySlug: 'game-top-up' })}
-                  className="hover:text-cyan-400 transition-colors"
+                  className="hover:text-cyan-400 transition-colors cursor-pointer"
                 >
-                  ফ্রি ফায়ার ডায়মন্ড টপআপ
+                  {isBangla ? 'ফ্রি ফায়ার ডায়মন্ড টপআপ' : 'Free Fire Diamond Top-Up'}
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => navigateTo('catalog', { categorySlug: 'game-top-up' })}
-                  className="hover:text-cyan-400 transition-colors"
+                  className="hover:text-cyan-400 transition-colors cursor-pointer"
                 >
-                  পাবজি মোবাইল ইউসি (UC)
+                  {isBangla ? 'পাবজি মোবাইল ইউসি (UC)' : 'PUBG Mobile UC'}
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => navigateTo('catalog', { categorySlug: 'digital-cards' })}
-                  className="hover:text-cyan-400 transition-colors"
+                  className="hover:text-cyan-400 transition-colors cursor-pointer"
                 >
-                  স্টিম ওয়ালেট গিফট কার্ড
+                  {isBangla ? 'স্টিম ওয়ালেট গিফট কার্ড' : 'Steam Wallet Gift Cards'}
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => navigateTo('catalog', { categorySlug: 'digital-cards' })}
-                  className="hover:text-cyan-400 transition-colors"
+                  className="hover:text-cyan-400 transition-colors cursor-pointer"
                 >
-                  গুগল প্লে স্টোর কার্ড
+                  {isBangla ? 'গুগল প্লে স্টোর কার্ড' : 'Google Play Gift Cards'}
                 </button>
               </li>
             </ul>
@@ -76,33 +82,33 @@ export const Footer: React.FC = () => {
           {/* Col 3: Customer Service */}
           <div>
             <h4 className="font-heading font-bold text-white text-base mb-4">
-              কাস্টমার সার্ভিস
+              {isBangla ? 'কাস্টমার সার্ভিস' : 'Customer Service'}
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
                 <button
                   onClick={() => navigateTo('track-order')}
-                  className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                  className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors cursor-pointer"
                 >
-                  অর্ডার লাইভ ট্র্যাক করুন
+                  {isBangla ? 'অর্ডার লাইভ ট্র্যাক করুন' : 'Live Order Tracker'}
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => navigateTo('account')}
-                  className="hover:text-cyan-400 transition-colors"
+                  className="hover:text-cyan-400 transition-colors cursor-pointer"
                 >
-                  ওয়ালেট ব্যালেন্স ও হিস্ট্রি
+                  {isBangla ? 'ওয়ালেট ব্যালেন্স ও হিস্ট্রি' : 'Wallet Balance & History'}
                 </button>
               </li>
               <li className="text-slate-400">
-                <span>হোয়াটসঅ্যাপ সাপোর্ট: </span>
+                <span>{isBangla ? 'হোয়াটসঅ্যাপ সাপোর্ট: ' : 'WhatsApp Support: '}</span>
                 <span className="text-slate-300 font-mono">
                   {siteSettings.supportWhatsapp || '+880 1788-992211'}
                 </span>
               </li>
               <li className="text-slate-400">
-                <span>ইমেইল: </span>
+                <span>{isBangla ? 'ইমেইল: ' : 'Email: '}</span>
                 <span className="text-slate-300 font-mono">
                   {siteSettings.supportEmail || 'support@superstorez.com'}
                 </span>
@@ -113,7 +119,7 @@ export const Footer: React.FC = () => {
           {/* Col 4: Safe Payments */}
           <div>
             <h4 className="font-heading font-bold text-white text-base mb-4">
-              নিরাপদ পেমেন্ট মেথড
+              {isBangla ? 'নিরাপদ পেমেন্ট মেথড' : 'Payment Methods'}
             </h4>
             <div className="flex flex-wrap gap-2 mb-3">
               <span className="px-2.5 py-1 rounded bg-[#e2136e]/20 text-[#ff4f9e] border border-[#e2136e]/40 font-bold text-[11px]">
@@ -130,24 +136,26 @@ export const Footer: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              সমস্ত লেনদেন এনক্রিপ্ট করা ও রিয়েল-টাইম MFS লেজার দ্বারা সুরক্ষিত।
+              {isBangla
+                ? 'সমস্ত লেনদেন এনক্রিপ্ট করা ও রিয়েল-টাইম MFS লেজার দ্বারা সুরক্ষিত।'
+                : 'All transactions are encrypted and tracked via real-time ledger.'}
             </p>
           </div>
         </div>
 
-        {/* Bottom bar - Admin Access at the very bottom */}
+        {/* Bottom bar */}
         <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            © 2026 {siteSettings.storeName || 'SuperStorez.com'}. সর্বস্বত্ব সংরক্ষিত।
+            © 2026 {siteSettings.storeName || 'SuperStorez.com'}. {isBangla ? 'সর্বস্বত্ব সংরক্ষিত।' : 'All rights reserved.'}
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            <span className="hover:text-slate-400 cursor-pointer">প্রাইভেসি পলিসি</span>
+            <span className="hover:text-slate-400 cursor-pointer">{isBangla ? 'প্রাইভেসি পলিসি' : 'Privacy Policy'}</span>
             <span>•</span>
-            <span className="hover:text-slate-400 cursor-pointer">টার্মস অ্যান্ড কন্ডিশনস</span>
+            <span className="hover:text-slate-400 cursor-pointer">{isBangla ? 'টার্মস অ্যান্ড কন্ডিশনস' : 'Terms & Conditions'}</span>
             <span>•</span>
-            <span className="hover:text-slate-400 cursor-pointer">রিফান্ড গ্যারান্টি</span>
+            <span className="hover:text-slate-400 cursor-pointer">{isBangla ? 'রিফান্ড গ্যারান্টি' : 'Refund Policy'}</span>
 
-            {/* Admin Portal Access: ONLY visible to logged-in admin. Completely invisible to all normal users */}
+            {/* Admin Portal Access */}
             {isAdmin && (
               <>
                 <span>•</span>
@@ -157,7 +165,7 @@ export const Footer: React.FC = () => {
                   title="SuperStorez Admin Dashboard"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                  <span>এডমিন প্যানেল</span>
+                  <span>{isBangla ? 'এডমিন প্যানেল' : 'Admin Panel'}</span>
                 </button>
               </>
             )}

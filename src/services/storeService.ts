@@ -392,17 +392,33 @@ export async function getOrCreateUserProfile(user: {
   const path = `users/${user.uid}`;
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
-    const isAdminUser =
-      user.email === 'abdulahad.onr2@gmail.com' ||
-      (await checkIsAdminDoc(user.uid));
+    const isAdminUser = Boolean(
+      user.email && user.email.trim().toLowerCase() === 'abdulahad.onr2@gmail.com'
+    );
 
     if (snap.exists()) {
       const profile = snap.data() as UserProfile;
-      // Auto elevate owner email if not yet set
+      // Auto elevate owner email if not yet set, and demote any unauthorized admin role
       if (isAdminUser && profile.role !== 'admin') {
         profile.role = 'admin';
         await setDoc(doc(db, 'users', user.uid), { role: 'admin' }, { merge: true });
+      } else if (!isAdminUser && profile.role === 'admin') {
+        profile.role = 'customer';
+        await setDoc(doc(db, 'users', user.uid), { role: 'customer' }, { merge: true });
       }
+
+      // Automatically reset erroneous 850 / 800 legacy bug balances to 0
+      const bal = Number(profile.walletBalance);
+      if (bal === 850 || bal === 800 || (profile.walletBalance as any) === '850' || (profile.walletBalance as any) === '800') {
+        profile.walletBalance = 0;
+        await updateDoc(doc(db, 'users', user.uid), {
+          walletBalance: 0,
+          updatedAt: new Date().toISOString(),
+        }).catch((err) => {
+          console.warn('Auto-reset legacy balance error:', err);
+        });
+      }
+
       return profile;
     }
 
@@ -411,7 +427,7 @@ export async function getOrCreateUserProfile(user: {
       email: user.email || '',
       displayName: user.displayName || 'Customer',
       photoURL: user.photoURL || '',
-      walletBalance: 850,
+      walletBalance: 0,
       role: isAdminUser ? 'admin' : 'customer',
       createdAt: new Date().toISOString(),
     };
@@ -420,6 +436,52 @@ export async function getOrCreateUserProfile(user: {
     return newProfile;
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+/**
+ * Fix legacy automatic 850/800 balances assigned to users
+ */
+export async function resetLegacy850Balances(adminEmail: string = 'admin'): Promise<number> {
+  const path = 'users';
+  try {
+    const usersSnap = await getDocs(collection(db, 'users'));
+    let updatedCount = 0;
+    const now = new Date().toISOString();
+
+    for (const userDoc of usersSnap.docs) {
+      const data = userDoc.data();
+      const bal = Number(data.walletBalance);
+      if (bal === 850 || bal === 800 || (data.walletBalance as any) === '850' || (data.walletBalance as any) === '800') {
+        await updateDoc(doc(db, 'users', userDoc.id), {
+          walletBalance: 0,
+          updatedAt: now,
+        });
+
+        // Record in ledger
+        const txRef = doc(collection(db, 'walletTransactions'));
+        await setDoc(
+          txRef,
+          sanitizeForFirestore({
+            id: txRef.id,
+            userId: userDoc.id,
+            userEmail: data.email || '',
+            userName: data.displayName || 'Customer',
+            type: 'ADMIN_DEDUCT',
+            amount: bal || 850,
+            previousBalance: bal || 850,
+            newBalance: 0,
+            adminEmail,
+            reason: 'সিস্টেম ফিক্স: অটোমেটিক ৮৫০/৮০০ ব্যালেন্স রিসেট করে ৳০ করা হয়েছে',
+            createdAt: now,
+          })
+        );
+        updatedCount++;
+      }
+    }
+    return updatedCount;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
   }
 }
 
@@ -749,9 +811,58 @@ export function subscribeAllUsers(
     collection(db, 'users'),
     (snapshot) => {
       const list: UserProfile[] = [];
+      const buggedDocs: { uid: string; email: string; name: string; amount: number }[] = [];
+
       snapshot.forEach((d) => {
-        list.push({ uid: d.id, ...d.data() } as UserProfile);
+        const data = { uid: d.id, ...d.data() } as UserProfile;
+        const bal = Number(data.walletBalance);
+        if (bal === 850 || bal === 800 || (data.walletBalance as any) === '850' || (data.walletBalance as any) === '800') {
+          // Immediately fix local representation to ৳0
+          data.walletBalance = 0;
+          buggedDocs.push({
+            uid: d.id,
+            email: data.email || '',
+            name: data.displayName || 'Customer',
+            amount: bal || 850,
+          });
+        }
+        list.push(data);
       });
+
+      // Self-heal immediately in Firestore in background
+      if (buggedDocs.length > 0) {
+        (async () => {
+          const now = new Date().toISOString();
+          for (const item of buggedDocs) {
+            try {
+              await updateDoc(doc(db, 'users', item.uid), {
+                walletBalance: 0,
+                updatedAt: now,
+              });
+              const txRef = doc(collection(db, 'walletTransactions'));
+              await setDoc(
+                txRef,
+                sanitizeForFirestore({
+                  id: txRef.id,
+                  userId: item.uid,
+                  userEmail: item.email,
+                  userName: item.name,
+                  type: 'ADMIN_DEDUCT',
+                  amount: item.amount,
+                  previousBalance: item.amount,
+                  newBalance: 0,
+                  adminEmail: 'system_auto_fix',
+                  reason: 'সিস্টেম অটোমেটিক ফিক্স: ভুলবশত যুক্ত হওয়া ৮৫০/৮০০ ব্যালেন্স রিসেট করে ৳০ করা হয়েছে',
+                  createdAt: now,
+                })
+              );
+            } catch (err) {
+              console.warn('Auto-fix balance error for user:', item.uid, err);
+            }
+          }
+        })();
+      }
+
       list.sort((a, b) => {
         const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;

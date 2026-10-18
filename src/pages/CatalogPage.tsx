@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
+import { useLanguage } from '../context/ThemeLanguageContext';
 import { ProductCard } from '../components/ProductCard';
-import { Search, Filter, SlidersHorizontal, Gamepad2, CreditCard, Sparkles, X, ArrowLeft } from 'lucide-react';
+import { Search, SlidersHorizontal, X, ArrowLeft } from 'lucide-react';
 
 export const CatalogPage: React.FC = () => {
   const { products, categories, selectedCategorySlug, searchTerm, setSearchTerm, navigateTo } =
     useStore();
+  const { isBangla, t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState<string>(selectedCategorySlug || 'all');
   const [sortBy, setSortBy] = useState<'popular' | 'price-low' | 'price-high' | 'name'>('popular');
 
@@ -40,7 +42,7 @@ export const CatalogPage: React.FC = () => {
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#0a1122] hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 text-cyan-400" />
-          <span>← হোমে ফিরে যান (Back to Home)</span>
+          <span>{isBangla ? '← হোমে ফিরে যান' : '← Back to Home'}</span>
         </button>
       </div>
 
@@ -49,10 +51,12 @@ export const CatalogPage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="font-heading font-black text-2xl sm:text-3xl text-white">
-              প্রোডাক্ট ক্যাটালগ ও গেম স্টোর
+              {isBangla ? 'প্রোডাক্ট ক্যাটালগ ও গেম স্টোর' : 'Product Catalog & Store'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              আপনার পছন্দের গেম টপআপ ও ডিজিটাল কার্ড বেছে নিন
+              {isBangla
+                ? 'আপনার পছন্দের গেম টপআপ ও ডিজিটাল কার্ড বেছে নিন'
+                : 'Browse all game top-ups, gift cards and subscriptions'}
             </p>
           </div>
 
@@ -63,13 +67,13 @@ export const CatalogPage: React.FC = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="গেম বা কার্ড খুঁজুন..."
+              placeholder={isBangla ? 'গেম বা কার্ড খুঁজুন...' : 'Search games or cards...'}
               className="w-full bg-[#0d1629] text-sm text-slate-200 placeholder:text-slate-400 pl-10 pr-9 py-2.5 rounded-xl border border-slate-700/80 focus:outline-none focus:border-cyan-500 transition-all"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -83,26 +87,28 @@ export const CatalogPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={() => setActiveCategory('all')}
-              className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+              className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
                 activeCategory === 'all'
                   ? 'bg-cyan-500 text-black font-semibold shadow-md shadow-cyan-500/20'
                   : 'bg-slate-900/60 text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-800'
               }`}
             >
-              সকল পণ্য ({products.filter((p) => p.isActive).length})
+              {isBangla
+                ? `সকল পণ্য (${products.filter((p) => p.isActive).length})`
+                : `All Items (${products.filter((p) => p.isActive).length})`}
             </button>
 
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
                   activeCategory === cat.id
                     ? 'bg-cyan-500 text-black font-semibold shadow-md shadow-cyan-500/20'
                     : 'bg-slate-900/60 text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-800'
                 }`}
               >
-                {cat.nameBn || cat.name}
+                {isBangla ? (cat.nameBn || cat.name) : cat.name}
               </button>
             ))}
           </div>
@@ -113,12 +119,12 @@ export const CatalogPage: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-slate-900 text-xs sm:text-sm text-slate-300 border border-slate-800 rounded-xl px-3 py-1.5 focus:outline-none focus:border-cyan-500"
+              className="bg-slate-900 text-xs sm:text-sm text-slate-300 border border-slate-800 rounded-xl px-3 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
             >
-              <option value="popular">জনপ্রিয়তা অনুসারে</option>
-              <option value="price-low">মূল্য: কম থেকে বেশি</option>
-              <option value="price-high">মূল্য: বেশি থেকে কম</option>
-              <option value="name">নাম অনুসারে (A-Z)</option>
+              <option value="popular">{isBangla ? 'জনপ্রিয়তা অনুসারে' : 'Most Popular'}</option>
+              <option value="price-low">{isBangla ? 'মূল্য: কম থেকে বেশি' : 'Price: Low to High'}</option>
+              <option value="price-high">{isBangla ? 'মূল্য: বেশি থেকে কম' : 'Price: High to Low'}</option>
+              <option value="name">{isBangla ? 'নাম অনুসারে (A-Z)' : 'Name (A-Z)'}</option>
             </select>
           </div>
         </div>
@@ -131,19 +137,21 @@ export const CatalogPage: React.FC = () => {
             <Search className="w-8 h-8" />
           </div>
           <h3 className="font-heading font-bold text-lg text-white mb-2">
-            কোনো প্রোডাক্ট পাওয়া যায়নি
+            {isBangla ? 'কোনো প্রোডাক্ট পাওয়া যায়নি' : 'No products found'}
           </h3>
           <p className="text-xs sm:text-sm text-slate-400 mb-6">
-            আপনার সার্চ ফিল্টার পরিবর্তন করুন বা অন্য কোনো গেমের নাম অনুসন্ধান করুন।
+            {isBangla
+              ? 'আপনার সার্চ ফিল্টার পরিবর্তন করুন বা অন্য কোনো গেমের নাম অনুসন্ধান করুন।'
+              : 'Try adjusting your search terms or choose a different category.'}
           </p>
           <button
             onClick={() => {
               setActiveCategory('all');
               setSearchTerm('');
             }}
-            className="px-5 py-2.5 rounded-xl bg-cyan-500 text-black font-semibold text-xs sm:text-sm shadow-md"
+            className="px-5 py-2.5 rounded-xl bg-cyan-500 text-black font-semibold text-xs sm:text-sm shadow-md cursor-pointer"
           >
-            ফিল্টার রিসেট করুন
+            {isBangla ? 'ফিল্টার রিসেট করুন' : 'Reset Filters'}
           </button>
         </div>
       ) : (

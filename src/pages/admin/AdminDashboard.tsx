@@ -16,6 +16,7 @@ import {
   subscribeAllUsers,
   adminAdjustUserWallet,
   subscribeAllWalletTransactions,
+  resetLegacy850Balances,
 } from '../../services/storeService';
 import { initialProducts, initialCategories, initialSiteSettings } from '../../data/seedData';
 import {
@@ -135,6 +136,7 @@ export const AdminDashboard: React.FC = () => {
   const [adjustReason, setAdjustReason] = useState('');
   const [isAdjustingWallet, setIsAdjustingWallet] = useState(false);
   const [allWalletTxs, setAllWalletTxs] = useState<WalletTransaction[]>([]);
+  const [isResetting850, setIsResetting850] = useState(false);
 
   // Supabase Integration State
   const [supabaseStatus, setSupabaseStatus] = useState<{
@@ -318,6 +320,18 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleReset850Balances = async () => {
+    setIsResetting850(true);
+    try {
+      const count = await resetLegacy850Balances(user?.email || 'admin');
+      showToast(`${count} জন ইউজারের পূর্ববর্তী ৮৫০/৮০০ ব্যালেন্স রিসেট করে ৳০ করা হয়েছে।`, 'success');
+    } catch (err: any) {
+      showToast(`রিসেট করতে সমস্যা হয়েছে: ${err.message}`, 'error');
+    } finally {
+      setIsResetting850(false);
+    }
+  };
+
   const handleRejectDeposit = async () => {
     if (!rejectModalDeposit) return;
     setIsProcessingDeposit(true);
@@ -416,8 +430,8 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Restrict Admin Access to specific authorized Google email (Section 6)
-  if (!user || user.email !== AUTHORIZED_ADMIN_EMAIL) {
+  // Restrict Admin Access strictly to the specific authorized Google email
+  if (!isAdmin || !user?.email || user.email.trim().toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
     return (
       <div className="min-h-screen bg-[#060b14] text-slate-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full p-8 rounded-3xl bg-[#0a1122] border border-rose-900/60 shadow-2xl text-center space-y-4">
@@ -1239,6 +1253,36 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Alert / Reset button if any user has the legacy 850 or 800 balance */}
+              {allUsers.some((u) => {
+                const b = Number(u.walletBalance);
+                return b === 850 || b === 800 || (u.walletBalance as any) === '850' || (u.walletBalance as any) === '800';
+              }) && (
+                <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-xs sm:text-sm text-white">
+                        {allUsers.filter((u) => {
+                          const b = Number(u.walletBalance);
+                          return b === 850 || b === 800 || (u.walletBalance as any) === '850' || (u.walletBalance as any) === '800';
+                        }).length} জন ইউজারের একাউন্টে পূর্বে ভুলবশত অটোমেটিক ৮৫০/৮০০ ব্যালেন্স যুক্ত হয়েছিল
+                      </h4>
+                      <p className="text-[11px] text-amber-300/80">
+                        নতুন রেজিস্টারকৃত ইউজারের ব্যালেন্স এখন থেকে ৳০। এক ক্লিকে পূর্ববর্তী সকল ৮৫০/৮০০ ব্যালেন্স রিসেট করে ৳০ করতে পারেন।
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleReset850Balances}
+                    disabled={isResetting850}
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer whitespace-nowrap"
+                  >
+                    {isResetting850 ? 'রিসেট হচ্ছে...' : 'সকল ৮৫০/৮০০ ব্যালেন্স ৳০ করুন'}
+                  </button>
+                </div>
+              )}
 
               {/* Users Table */}
               <div className="rounded-3xl bg-[#0a1122] border border-slate-800 overflow-hidden">

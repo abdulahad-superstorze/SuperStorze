@@ -1,34 +1,36 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
+import { useLanguage } from '../context/ThemeLanguageContext';
 import { Zap, Shield, Clock } from 'lucide-react';
 
 export const QuickZoneCards: React.FC = () => {
   const { navigateTo } = useStore();
+  const { isBangla, t } = useLanguage();
 
   const zones = [
     {
-      tag: 'TOP-UP ZONE',
-      title: 'গেম টপআপ',
-      subtitle: 'Free Fire, PUBG, MLBB, Valorant',
+      tag: isBangla ? 'টপআপ জোন' : 'TOP-UP ZONE',
+      title: isBangla ? 'গেম টপআপ' : 'Game Top-Up',
+      subtitle: isBangla ? 'Free Fire, PUBG, MLBB, Valorant' : 'Free Fire, PUBG, MLBB, Valorant',
       icon: Zap,
       iconColor: 'text-cyan-400',
       iconBg: 'bg-cyan-950/60 border-cyan-800/60',
       onClick: () => navigateTo('catalog', { categorySlug: 'game-top-up' }),
     },
     {
-      tag: 'DIGITAL CARDS',
-      title: 'গিফট কার্ড ও কি',
-      subtitle: 'Steam, Google Play, Apple, Win 11',
+      tag: isBangla ? 'ডিজিটাল কার্ড' : 'DIGITAL CARDS',
+      title: isBangla ? 'গিফট কার্ড ও কি' : 'Gift Cards & Keys',
+      subtitle: isBangla ? 'Steam, Google Play, Apple, Win 11' : 'Steam, Google Play, Apple, Win 11',
       icon: Shield,
       iconColor: 'text-purple-400',
       iconBg: 'bg-purple-950/60 border-purple-800/60',
       onClick: () => navigateTo('catalog', { categorySlug: 'digital-cards' }),
     },
     {
-      tag: 'LIVE FEATURE',
+      tag: isBangla ? 'লাইভ ফিচার' : 'LIVE FEATURE',
       tagDot: true,
-      title: 'অর্ডার ট্র্যাকার',
-      subtitle: 'অর্ডার নম্বর দিয়ে লাইভ স্ট্যাটাস দেখুন',
+      title: isBangla ? 'অর্ডার ট্র্যাকার' : 'Order Tracker',
+      subtitle: isBangla ? 'অর্ডার নম্বর দিয়ে লাইভ স্ট্যাটাস দেখুন' : 'Check real-time delivery status',
       icon: Clock,
       iconColor: 'text-cyan-400',
       iconBg: 'bg-cyan-950/60 border-cyan-800/60',

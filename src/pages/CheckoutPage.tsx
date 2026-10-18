@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/ThemeLanguageContext';
 import { placeWalletOrder } from '../services/storeService';
 import { saveTopUpRequirementToSupabase } from '../services/supabaseService';
 import { DepositModal } from '../components/DepositModal';
@@ -25,6 +26,7 @@ export const CheckoutPage: React.FC = () => {
   const { items, subtotal, clearCart } = useCart();
   const { navigateTo, showToast } = useStore();
   const { user, profile, loginWithGoogle } = useAuth();
+  const { isBangla, t } = useLanguage();
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
   const [customerName, setCustomerName] = useState(profile?.displayName || user?.displayName || '');
@@ -160,16 +162,18 @@ export const CheckoutPage: React.FC = () => {
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#0a1122] hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 text-cyan-400" />
-          <span>← কেনাকাটায় ফিরে যান (Back to Shop)</span>
+          <span>{isBangla ? '← কেনাকাটায় ফিরে যান (Back to Shop)' : '← Back to Shop'}</span>
         </button>
       </div>
 
       <div className="mb-6">
         <h1 className="font-heading font-black text-2xl sm:text-3xl text-white">
-          ওয়ালেট চেকআউট ও অর্ডার কনফার্মেশন
+          {isBangla ? 'ওয়ালেট চেকআউট ও অর্ডার কনফার্মেশন' : 'Wallet Checkout & Confirmation'}
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          আপনার ওয়ালেট ব্যালেন্স থেকে ইনস্ট্যান্ট পেমেন্ট করে তাৎক্ষণিক ডেলিভারি গ্রহণ করুন।
+          {isBangla
+            ? 'আপনার ওয়ালেট ব্যালেন্স থেকে ইনস্ট্যান্ট পেমেন্ট করে তাৎক্ষণিক ডেলিভারি গ্রহণ করুন।'
+            : 'Pay instantly from your wallet balance for immediate automated delivery.'}
         </p>
       </div>
 

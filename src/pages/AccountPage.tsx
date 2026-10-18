@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
+import { useLanguage } from '../context/ThemeLanguageContext';
 import { subscribeUserOrders, subscribeUserDepositRequests } from '../services/storeService';
 import { Order, DepositRequest } from '../types';
 import { DepositModal } from '../components/DepositModal';
@@ -10,7 +11,6 @@ import {
   Clock,
   Package,
   ArrowRight,
-  ShieldCheck,
   PlusCircle,
   LogIn,
   CheckCircle2,
@@ -19,13 +19,13 @@ import {
   Eye,
   X,
   CreditCard,
-  FileText,
   ArrowLeft,
 } from 'lucide-react';
 
 export const AccountPage: React.FC = () => {
   const { user, profile, loginWithGoogle } = useAuth();
   const { navigateTo } = useStore();
+  const { isBangla, t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<'orders' | 'deposits'>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
@@ -68,17 +68,19 @@ export const AccountPage: React.FC = () => {
           <UserIcon className="w-8 h-8" />
         </div>
         <h2 className="font-heading font-black text-2xl text-white mb-2">
-          কাস্টমার একাউন্ট
+          {isBangla ? 'কাস্টমার একাউন্ট' : 'Customer Account'}
         </h2>
         <p className="text-sm text-slate-400 mb-6">
-          আপনার ওয়ালেট ব্যালেন্স দেখা, টাকা ডিপোজিট করা এবং পূর্বের অর্ডার হিস্ট্রি ট্র্যাক করার জন্য সাইন ইন করুন।
+          {isBangla
+            ? 'আপনার ওয়ালেট ব্যালেন্স দেখা, টাকা ডিপোজিট করা এবং পূর্বের অর্ডার হিস্ট্রি ট্র্যাক করার জন্য সাইন ইন করুন।'
+            : 'Sign in to check your wallet balance, deposit funds, and track your orders.'}
         </p>
         <button
           onClick={loginWithGoogle}
-          className="w-full py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25"
+          className="w-full py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 cursor-pointer"
         >
           <LogIn className="w-4 h-4" />
-          <span>Google দিয়ে সাইন ইন করুন</span>
+          <span>{isBangla ? 'Google দিয়ে সাইন ইন করুন' : 'Sign in with Google'}</span>
         </button>
       </div>
     );
@@ -95,14 +97,14 @@ export const AccountPage: React.FC = () => {
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#0a1122] hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
         >
           <ArrowLeft className="w-4 h-4 text-cyan-400" />
-          <span>← হোমে ফিরে যান (Back to Home)</span>
+          <span>{isBangla ? '← হোমে ফিরে যান' : '← Back to Home'}</span>
         </button>
 
         <button
           onClick={() => navigateTo('catalog')}
           className="text-xs text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
         >
-          <span>প্রোডাক্ট ক্যাটালগ</span>
+          <span>{isBangla ? 'প্রোডাক্ট ক্যাটালগ' : 'Product Catalog'}</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -122,15 +124,19 @@ export const AccountPage: React.FC = () => {
           <div className="flex-1 text-center sm:text-left">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
               <h1 className="font-heading font-black text-2xl text-white">
-                {profile?.displayName || 'সম্মানিত গেমার'}
+                {profile?.displayName || (isBangla ? 'সম্মানিত গেমার' : 'Valued Gamer')}
               </h1>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
-                {profile?.role === 'admin' ? 'এডমিনিস্ট্রেটর' : 'ভেরিফাইড মেম্বার'}
+                {profile?.role === 'admin'
+                  ? (isBangla ? 'এডমিনিস্ট্রেটর' : 'Administrator')
+                  : (isBangla ? 'ভেরিফাইড মেম্বার' : 'Verified Member')}
               </span>
             </div>
             <p className="text-xs text-slate-400 mb-3">{user.email}</p>
             <p className="text-xs text-slate-400">
-              SuperStorez.com এর সাথে যুক্ত থাকার জন্য ধন্যবাদ। এখানে আপনি আপনার ওয়ালেট ব্যালেন্স বাড়াতে এবং যেকোনো অর্ডারের লাইভ আপডেট দেখতে পারবেন।
+              {isBangla
+                ? 'SuperStorez.com এর সাথে যুক্ত থাকার জন্য ধন্যবাদ। এখানে আপনি আপনার ওয়ালেট ব্যালেন্স বাড়াতে এবং যেকোনো অর্ডারের লাইভ আপডেট দেখতে পারবেন।'
+                : 'Thank you for choosing SuperStorez.com. Manage your wallet balance and review your complete transaction history here.'}
             </p>
           </div>
         </div>
@@ -144,7 +150,7 @@ export const AccountPage: React.FC = () => {
                 <span>SSBD Wallet</span>
               </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
-                অ্যাক্টিভ ব্যালেন্স
+                {isBangla ? 'অ্যাক্টিভ ব্যালেন্স' : 'Active Balance'}
               </span>
             </div>
 
@@ -152,7 +158,9 @@ export const AccountPage: React.FC = () => {
               ৳ {(profile?.walletBalance ?? 0).toFixed(2)}
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
-              যেকোনো গেম টপআপ বা গিফট কার্ডে ১-ক্লিক ইনস্ট্যান্ট পেমেন্ট
+              {isBangla
+                ? 'যেকোনো গেম টপআপ বা গিফট কার্ডে ১-ক্লিক ইনস্ট্যান্ট পেমেন্ট'
+                : 'Instant 1-click checkout on all products'}
             </p>
           </div>
 
@@ -161,7 +169,7 @@ export const AccountPage: React.FC = () => {
             className="mt-5 w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-400 hover:from-cyan-400 hover:to-cyan-300 text-black font-heading font-black text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/25 active:scale-[0.99] cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>টাকা ডিপোজিট করুন (Deposit Money)</span>
+            <span>{isBangla ? 'টাকা ডিপোজিট করুন (Deposit Money)' : 'Deposit Money'}</span>
           </button>
         </div>
       </div>
@@ -177,7 +185,7 @@ export const AccountPage: React.FC = () => {
           }`}
         >
           <Package className="w-4 h-4" />
-          <span>আমার অর্ডারসমূহ ({orders.length})</span>
+          <span>{isBangla ? `আমার অর্ডারসমূহ (${orders.length})` : `My Orders (${orders.length})`}</span>
         </button>
 
         <button
@@ -189,7 +197,7 @@ export const AccountPage: React.FC = () => {
           }`}
         >
           <CreditCard className="w-4 h-4" />
-          <span>ডিপোজিট হিস্ট্রি ({depositRequests.length})</span>
+          <span>{isBangla ? `ডিপোজিট হিস্ট্রি (${depositRequests.length})` : `Deposit History (${depositRequests.length})`}</span>
           {pendingDepositsCount > 0 && (
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
           )}
@@ -202,32 +210,36 @@ export const AccountPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <h2 className="font-heading font-black text-lg text-white flex items-center gap-2">
               <Package className="w-5 h-5 text-cyan-400" />
-              <span>পূর্ববর্তী অর্ডারসমূহ</span>
+              <span>{isBangla ? 'পূর্ববর্তী অর্ডারসমূহ' : 'Order History'}</span>
             </h2>
             <button
               onClick={() => navigateTo('track-order')}
-              className="text-xs text-cyan-400 hover:underline"
+              className="text-xs text-cyan-400 hover:underline cursor-pointer"
             >
-              লাইভ ট্র্যাকার
+              {isBangla ? 'লাইভ ট্র্যাকার' : 'Live Tracker'}
             </button>
           </div>
 
           {loadingOrders ? (
-            <div className="p-8 text-center text-slate-400 text-xs">অর্ডার লোড হচ্ছে...</div>
+            <div className="p-8 text-center text-slate-400 text-xs">
+              {isBangla ? 'অর্ডার লোড হচ্ছে...' : 'Loading orders...'}
+            </div>
           ) : orders.length === 0 ? (
             <div className="p-10 rounded-3xl bg-[#0a1122] border border-slate-800 text-center">
               <Clock className="w-10 h-10 text-slate-600 mx-auto mb-3" />
               <p className="text-slate-300 font-medium text-sm mb-1">
-                এখনও কোনো অর্ডার রেকর্ড নেই
+                {isBangla ? 'এখনও কোনো অর্ডার রেকর্ড নেই' : 'No orders recorded yet'}
               </p>
               <p className="text-xs text-slate-400 mb-4">
-                আপনার পছন্দের গেম বা কার্ড অর্ডার করতে আমাদের ক্যাটালগ দেখুন।
+                {isBangla
+                  ? 'আপনার পছন্দের গেম বা কার্ড অর্ডার করতে আমাদের ক্যাটালগ দেখুন।'
+                  : 'Browse our catalog to place your first game top-up or gift card order.'}
               </p>
               <button
                 onClick={() => navigateTo('catalog')}
-                className="px-4 py-2 bg-cyan-500 text-black font-semibold rounded-xl text-xs"
+                className="px-4 py-2 bg-cyan-500 text-black font-semibold rounded-xl text-xs cursor-pointer"
               >
-                এখনই ব্রাউজ করুন
+                {isBangla ? 'এখনই ব্রাউজ করুন' : 'Browse Now'}
               </button>
             </div>
           ) : (
@@ -251,13 +263,13 @@ export const AccountPage: React.FC = () => {
                       {ord.items.map((i) => `${i.productName} (${i.variationName})`).join(', ')}
                     </p>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      {new Date(ord.createdAt).toLocaleString('bn-BD')}
+                      {new Date(ord.createdAt).toLocaleString(isBangla ? 'bn-BD' : 'en-US')}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-4 self-end sm:self-auto">
                     <div className="text-right">
-                      <span className="text-[10px] text-slate-400 block">মোট মূল্য</span>
+                      <span className="text-[10px] text-slate-400 block">{isBangla ? 'মোট মূল্য' : 'Total'}</span>
                       <span className="font-heading font-black text-lg text-cyan-400">
                         ৳ {ord.totalAmount}
                       </span>
@@ -267,7 +279,7 @@ export const AccountPage: React.FC = () => {
                       onClick={() => navigateTo('track-order', { order: ord })}
                       className="px-3.5 py-2 rounded-xl bg-[#0d1629] hover:bg-cyan-500 hover:text-black text-cyan-300 border border-cyan-800/60 text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer"
                     >
-                      <span>ট্র্যাক করুন</span>
+                      <span>{isBangla ? 'ট্র্যাক করুন' : 'Track'}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -284,33 +296,37 @@ export const AccountPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <h2 className="font-heading font-black text-lg text-white flex items-center gap-2">
               <Wallet className="w-5 h-5 text-cyan-400" />
-              <span>ডিপোজিট রিকোয়েস্ট তালিকা</span>
+              <span>{isBangla ? 'ডিপোজিট রিকোয়েস্ট তালিকা' : 'Deposit Requests'}</span>
             </h2>
             <button
               onClick={() => setIsDepositModalOpen(true)}
               className="px-3.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
             >
               <PlusCircle className="w-3.5 h-3.5" />
-              <span>নতুন ডিপোজিট</span>
+              <span>{isBangla ? 'নতুন ডিপোজিট' : 'New Deposit'}</span>
             </button>
           </div>
 
           {loadingDeposits ? (
-            <div className="p-8 text-center text-slate-400 text-xs">ডিপোজিট ডাটা লোড হচ্ছে...</div>
+            <div className="p-8 text-center text-slate-400 text-xs">
+              {isBangla ? 'ডিপোজিট ডাটা লোড হচ্ছে...' : 'Loading deposits...'}
+            </div>
           ) : depositRequests.length === 0 ? (
             <div className="p-10 rounded-3xl bg-[#0a1122] border border-slate-800 text-center">
               <Wallet className="w-10 h-10 text-slate-600 mx-auto mb-3" />
               <p className="text-slate-300 font-medium text-sm mb-1">
-                কোনো ডিপোজিট রিকোয়েস্ট পাওয়া যায়নি
+                {isBangla ? 'কোনো ডিপোজিট রিকোয়েস্ট পাওয়া যায়নি' : 'No deposit requests found'}
               </p>
               <p className="text-xs text-slate-400 mb-4">
-                বিকাশ, নগদ বা রকেটের মাধ্যমে টাকা পাঠিয়ে এখনই আপনার ওয়ালেট ব্যালেন্স বাড়ান।
+                {isBangla
+                  ? 'বিকাশ, নগদ বা রকেটের মাধ্যমে টাকা পাঠিয়ে এখনই আপনার ওয়ালেট ব্যালেন্স বাড়ান।'
+                  : 'Add funds via bKash, Nagad or Rocket to recharge your wallet balance.'}
               </p>
               <button
                 onClick={() => setIsDepositModalOpen(true)}
-                className="px-4 py-2 bg-cyan-500 text-black font-semibold rounded-xl text-xs"
+                className="px-4 py-2 bg-cyan-500 text-black font-semibold rounded-xl text-xs cursor-pointer"
               >
-                টাকা ডিপোজিট করুন
+                {isBangla ? 'টাকা ডিপোজিট করুন' : 'Deposit Money'}
               </button>
             </div>
           ) : (
@@ -330,19 +346,19 @@ export const AccountPage: React.FC = () => {
                       {dep.status === 'Pending' && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-950/80 text-amber-300 border border-amber-800">
                           <Hourglass className="w-3 h-3 animate-pulse" />
-                          <span>পেন্ডিং (ভেরিফিকেশন চলছে)</span>
+                          <span>{isBangla ? 'পেন্ডিং (ভেরিফিকেশন চলছে)' : 'Pending Verification'}</span>
                         </span>
                       )}
                       {dep.status === 'Approved' && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800">
                           <CheckCircle2 className="w-3 h-3" />
-                          <span>অনুমোদিত (টাকা যুক্ত হয়েছে)</span>
+                          <span>{isBangla ? 'অনুমোদিত (টাকা যুক্ত হয়েছে)' : 'Approved (Credited)'}</span>
                         </span>
                       )}
                       {dep.status === 'Rejected' && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-950/80 text-rose-300 border border-rose-800">
                           <XCircle className="w-3 h-3" />
-                          <span>বাতিল করা হয়েছে</span>
+                          <span>{isBangla ? 'বাতিল করা হয়েছে' : 'Rejected'}</span>
                         </span>
                       )}
 
@@ -352,16 +368,16 @@ export const AccountPage: React.FC = () => {
                     </div>
 
                     <div className="text-xs text-slate-300 flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 font-mono">
-                      <span>প্রেরক: <strong className="text-white">{dep.senderNumber}</strong></span>
+                      <span>{isBangla ? 'প্রেরক: ' : 'Sender: '}<strong className="text-white">{dep.senderNumber}</strong></span>
                       <span>TrxID: <strong className="text-cyan-300">{dep.transactionId}</strong></span>
                       <span className="text-slate-500 font-sans">
-                        {new Date(dep.createdAt).toLocaleString('bn-BD')}
+                        {new Date(dep.createdAt).toLocaleString(isBangla ? 'bn-BD' : 'en-US')}
                       </span>
                     </div>
 
                     {dep.adminNote && (
                       <p className="text-xs text-rose-300 bg-rose-950/40 border border-rose-900/60 p-2 rounded-lg mt-2">
-                        এডমিন নোট: {dep.adminNote}
+                        {isBangla ? `এডমিন নোট: ${dep.adminNote}` : `Admin Note: ${dep.adminNote}`}
                       </p>
                     )}
                   </div>
@@ -371,16 +387,16 @@ export const AccountPage: React.FC = () => {
                     {dep.screenshotUrl && (
                       <button
                         onClick={() => setViewingScreenshot(dep.screenshotUrl || null)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition-colors"
-                        title="পেমেন্ট প্রুফ স্ক্রিনশট দেখুন"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition-colors cursor-pointer"
+                        title={isBangla ? 'পেমেন্ট প্রুফ স্ক্রিনশট দেখুন' : 'View payment screenshot'}
                       >
                         <Eye className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>প্রুফ</span>
+                        <span>{isBangla ? 'প্রুফ' : 'Proof'}</span>
                       </button>
                     )}
 
                     <div className="text-right">
-                      <span className="text-[10px] text-slate-400 block">জমার পরিমাণ</span>
+                      <span className="text-[10px] text-slate-400 block">{isBangla ? 'জমার পরিমাণ' : 'Amount'}</span>
                       <span className="font-heading font-black text-xl text-cyan-400 font-mono">
                         ৳ {dep.amount.toFixed(2)}
                       </span>
@@ -405,7 +421,7 @@ export const AccountPage: React.FC = () => {
       {/* High-Resolution Screenshot Lightbox Modal */}
       {viewingScreenshot && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in cursor-pointer"
           onClick={() => setViewingScreenshot(null)}
         >
           <div
@@ -414,7 +430,7 @@ export const AccountPage: React.FC = () => {
           >
             <button
               onClick={() => setViewingScreenshot(null)}
-              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/70 border border-slate-700 flex items-center justify-center text-white hover:bg-black transition-colors"
+              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/70 border border-slate-700 flex items-center justify-center text-white hover:bg-black transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -424,7 +440,7 @@ export const AccountPage: React.FC = () => {
               className="w-full h-auto max-h-[75vh] object-contain rounded-2xl"
             />
             <p className="text-center text-xs text-slate-400 mt-2">
-              পেমেন্ট কনফার্মেশন স্ক্রিনশট
+              {isBangla ? 'পেমেন্ট কনফার্মেশন স্ক্রিনশট' : 'Payment Confirmation Screenshot'}
             </p>
           </div>
         </div>

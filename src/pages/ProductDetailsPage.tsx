@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/ThemeLanguageContext';
 import { saveTopUpRequirementToSupabase } from '../services/supabaseService';
 import { Product, ProductVariation } from '../types';
 import {
@@ -20,6 +21,7 @@ export const ProductDetailsPage: React.FC = () => {
   const { products, selectedProductId, navigateTo, showToast } = useStore();
   const { addToCart } = useCart();
   const { user, profile } = useAuth();
+  const { isBangla, t } = useLanguage();
 
   const product: Product | undefined = products.find((p) => p.id === selectedProductId) || products[0];
 
@@ -184,10 +186,10 @@ export const ProductDetailsPage: React.FC = () => {
       {/* Back button */}
       <button
         onClick={() => navigateTo('catalog')}
-        className="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-400 hover:text-cyan-400 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-400 hover:text-cyan-400 mb-6 transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>ক্যাটালগে ফিরে যান</span>
+        <span>{isBangla ? '← ক্যাটালগে ফিরে যান' : '← Back to Catalog'}</span>
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -209,7 +211,7 @@ export const ProductDetailsPage: React.FC = () => {
                 </span>
                 {discountPercent > 0 && (
                   <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-lg">
-                    {discountPercent}% ছাড়
+                    {discountPercent}% {isBangla ? 'ছাড়' : 'OFF'}
                   </span>
                 )}
               </div>
@@ -220,15 +222,15 @@ export const ProductDetailsPage: React.FC = () => {
           <div className="p-4 rounded-2xl bg-[#091122] border border-slate-800/80 space-y-2.5 text-xs text-slate-300">
             <div className="flex items-center gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-              <span>১০০% অফিসিয়াল কোড ও গ্যারান্টিযুক্ত টপআপ</span>
+              <span>{isBangla ? '১০০% অফিসিয়াল কোড ও গ্যারান্টিযুক্ত টপআপ' : '100% Official Codes & Guaranteed Top-Up'}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Clock className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-              <span>১ থেকে ৩ মিনিটের মধ্যে অটোমেটিক ডেলিভারি</span>
+              <span>{isBangla ? '১ থেকে ৩ মিনিটের মধ্যে অটোমেটিক ডেলিভারি' : '1-3 Minutes Instant Automated Delivery'}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <ShieldCheck className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-              <span>বিকাশ, নগদ ও রকেটে সম্পূর্ণ নিরাপদ লেনদেন</span>
+              <span>{isBangla ? 'বিকাশ, নগদ ও রকেটে সম্পূর্ণ নিরাপদ লেনদেন' : 'Secure payments via bKash, Nagad & Rocket'}</span>
             </div>
           </div>
 
@@ -237,7 +239,7 @@ export const ProductDetailsPage: React.FC = () => {
             <div className="p-5 rounded-2xl bg-[#0a1224] border border-slate-800">
               <h4 className="font-heading font-bold text-sm text-cyan-400 flex items-center gap-2 mb-2">
                 <Info className="w-4 h-4" />
-                <span>রিডিম বা ব্যবহারের নিয়ম</span>
+                <span>{isBangla ? 'রিডিম বা ব্যবহারের নিয়ম' : 'How to Redeem / Use'}</span>
               </h4>
               <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">
                 {product.instructions}
@@ -272,11 +274,11 @@ export const ProductDetailsPage: React.FC = () => {
               )}
               {isOutOfStock ? (
                 <span className="ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-950 text-rose-300 border border-rose-800">
-                  স্টক আউট
+                  {isBangla ? 'স্টক আউট' : 'Out of Stock'}
                 </span>
               ) : (
                 <span className="ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
-                  স্টকে আছে
+                  {isBangla ? 'স্টকে আছে' : 'In Stock'}
                 </span>
               )}
             </div>
@@ -291,7 +293,7 @@ export const ProductDetailsPage: React.FC = () => {
           {product.variations && product.variations.length > 0 && (
             <div className="space-y-3">
               <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
-                ১. প্যাকেজ নির্বাচন করুন
+                {isBangla ? '১. প্যাকেজ নির্বাচন করুন' : '1. Select Package'}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 {product.variations.map((v) => {
@@ -303,7 +305,7 @@ export const ProductDetailsPage: React.FC = () => {
                       type="button"
                       disabled={!isAvailable}
                       onClick={() => setSelectedVariation(v)}
-                      className={`p-3 rounded-xl border text-left transition-all relative ${
+                      className={`p-3 rounded-xl border text-left transition-all relative cursor-pointer ${
                         isSelected
                           ? 'bg-cyan-500/15 border-cyan-400 text-white shadow-md shadow-cyan-500/10'
                           : isAvailable
@@ -331,7 +333,7 @@ export const ProductDetailsPage: React.FC = () => {
           {product.customFields && product.customFields.length > 0 && (
             <div className="space-y-3 p-5 rounded-2xl bg-[#0a1224] border border-slate-800">
               <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider">
-                ২. প্লেয়ার আইডি ও তথ্য প্রদান করুন
+                {isBangla ? '২. প্লেয়ার আইডি ও তথ্য প্রদান করুন' : '2. Enter Player ID & Requirements'}
               </label>
 
               {product.customFields.map((field) => (
@@ -375,7 +377,7 @@ export const ProductDetailsPage: React.FC = () => {
                         }).catch((err) => console.warn('[Supabase] Field onBlur save notice:', err));
                       }
                     }}
-                    placeholder={field.placeholder || `আপনার ${field.label} লিখুন`}
+                    placeholder={field.placeholder || (isBangla ? `আপনার ${field.label} লিখুন` : `Enter your ${field.label}`)}
                     className={`w-full bg-[#0d1629] text-sm text-slate-200 px-4 py-2.5 rounded-xl border transition-all ${
                       fieldErrors[field.label]
                         ? 'border-rose-500 focus:ring-1 focus:ring-rose-500'
@@ -396,13 +398,13 @@ export const ProductDetailsPage: React.FC = () => {
           {/* Step 3: Quantity */}
           <div className="flex items-center gap-4">
             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-              পরিমাণ (Quantity):
+              {isBangla ? 'পরিমাণ (Quantity):' : 'Quantity:'}
             </span>
             <div className="flex items-center bg-[#0d1629] border border-slate-700 rounded-xl p-1">
               <button
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm"
+                className="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm cursor-pointer"
               >
                 -
               </button>
@@ -412,7 +414,7 @@ export const ProductDetailsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setQuantity(quantity + 1)}
-                className="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm"
+                className="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center font-bold text-sm cursor-pointer"
               >
                 +
               </button>
@@ -424,27 +426,27 @@ export const ProductDetailsPage: React.FC = () => {
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className={`flex-1 py-3.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 border ${
+              className={`flex-1 py-3.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 border cursor-pointer ${
                 isOutOfStock
                   ? 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed'
                   : 'bg-[#121c32] hover:bg-[#1a2745] text-cyan-300 border-cyan-800/80 hover:border-cyan-400 shadow-md'
               }`}
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>কার্টে যোগ করুন</span>
+              <span>{isBangla ? 'কার্টে যোগ করুন' : 'Add to Cart'}</span>
             </button>
 
             <button
               onClick={handleBuyNow}
               disabled={isOutOfStock}
-              className={`flex-1 py-3.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg ${
+              className={`flex-1 py-3.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
                 isOutOfStock
                   ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
                   : 'bg-cyan-400 hover:bg-cyan-300 text-black shadow-cyan-500/25 active:scale-[0.99]'
               }`}
             >
               <Zap className="w-4 h-4 fill-black" />
-              <span>এখনই কিনুন</span>
+              <span>{isBangla ? 'এখনই কিনুন' : 'Buy Now'}</span>
             </button>
           </div>
         </div>

@@ -1,9 +1,11 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
-import { Zap, ArrowRight, CheckCircle2, ShieldCheck, Headphones, Clock } from 'lucide-react';
+import { useLanguage } from '../context/ThemeLanguageContext';
+import { Zap, ArrowRight, CheckCircle2, ShieldCheck, Headphones } from 'lucide-react';
 
 export const Hero: React.FC = () => {
   const { siteSettings, navigateTo } = useStore();
+  const { isBangla, t } = useLanguage();
 
   return (
     <div className="relative pt-6 pb-8 md:pt-10 md:pb-12 overflow-hidden">
@@ -30,67 +32,70 @@ export const Hero: React.FC = () => {
             {/* Top Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/70 border border-cyan-800/60 text-cyan-300 text-xs sm:text-sm font-medium mb-6 backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-              <span>{siteSettings.heroBadge || 'বাংলাদেশি বিশ্বস্ত ডিজিটাল স্টোর ও ইনস্ট্যান্ট টপআপ'}</span>
+              <span>
+                {isBangla ? (siteSettings.heroBadge || t('hero_badge')) : t('hero_badge')}
+              </span>
             </div>
 
             {/* Headline */}
             <h1 className="font-heading font-black text-3xl sm:text-5xl md:text-6xl tracking-tight text-white leading-[1.15] mb-5">
-              <span>{siteSettings.heroTitle || 'ইনস্ট্যান্ট গেম টপআপ ও'}</span>
+              <span>
+                {isBangla ? (siteSettings.heroTitle || t('hero_title_1')) : t('hero_title_1')}
+              </span>
               <br />
               <span className="bg-gradient-to-r from-cyan-400 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
-                {siteSettings.heroTitleHighlight || 'ডিজিটাল গিফট কার্ড'}
+                {isBangla ? (siteSettings.heroTitleHighlight || t('hero_title_highlight')) : t('hero_title_highlight')}
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-slate-300 text-sm sm:text-base md:text-lg leading-relaxed mb-8 max-w-2xl font-normal">
-              {siteSettings.heroSubtitle ||
-                'Free Fire, PUBG, Steam Wallet, Netflix, Discord Nitro সহ ১০০+ ডিজিটাল পণ্য ও সাবস্ক্রিপশন কিনুন বিকাশ, নগদ বা রকেট দিয়ে। স্বয়ংক্রিয় দ্রুত ডেলিভারি।'}
+              {isBangla ? (siteSettings.heroSubtitle || t('hero_subtitle')) : t('hero_subtitle')}
             </p>
 
-            {/* Main Action Buttons matching screenshot */}
+            {/* Main Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-10">
               {/* Cyan Primary CTA */}
               <button
                 onClick={() => navigateTo('catalog', { categorySlug: 'game-top-up' })}
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-sm sm:text-base transition-all shadow-lg shadow-cyan-500/25 hover:scale-[1.02] active:scale-[0.98]"
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-sm sm:text-base transition-all shadow-lg shadow-cyan-500/25 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 <Zap className="w-4 h-4 fill-black" />
-                <span>গেম টপআপ করুন</span>
+                <span>{t('hero_btn_topup')}</span>
               </button>
 
-              {/* Secondary Dark CTA */}
+              {/* Secondary CTA */}
               <button
                 onClick={() => navigateTo('catalog', { categorySlug: 'digital-cards' })}
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#131d33] hover:bg-[#192744] text-white border border-slate-700/80 hover:border-cyan-500/50 font-medium text-sm sm:text-base transition-all hover:scale-[1.02]"
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#131d33] hover:bg-[#192744] text-white border border-slate-700/80 hover:border-cyan-500/50 font-medium text-sm sm:text-base transition-all hover:scale-[1.02] cursor-pointer"
               >
-                <span>গিফট কার্ড ব্রাউজ করুন</span>
+                <span>{t('hero_btn_cards')}</span>
                 <ArrowRight className="w-4 h-4 text-cyan-400" />
               </button>
 
               {/* Order Track Button */}
               <button
                 onClick={() => navigateTo('track-order')}
-                className="flex items-center gap-2 px-5 py-3 rounded-full bg-cyan-950/40 hover:bg-cyan-950/70 text-cyan-300 border border-cyan-800/60 font-medium text-sm transition-all"
+                className="flex items-center gap-2 px-5 py-3 rounded-full bg-cyan-950/40 hover:bg-cyan-950/70 text-cyan-300 border border-cyan-800/60 font-medium text-sm transition-all cursor-pointer"
               >
                 <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                <span>অর্ডার ট্র্যাক করুন</span>
+                <span>{t('hero_btn_track')}</span>
               </button>
             </div>
 
-            {/* Trust Badges matching screenshot */}
+            {/* Trust Badges */}
             <div className="pt-6 border-t border-slate-800/80 flex flex-wrap items-center gap-4 sm:gap-8 text-xs sm:text-sm text-slate-300">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-cyan-400" />
-                <span>১-৩ মিনিট ডেলিভারি</span>
+                <span>{t('hero_feature_delivery')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-cyan-400" />
-                <span>১০০% ভেরিফাইড গেটওয়ে</span>
+                <span>{t('hero_feature_gateway')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Headphones className="w-4 h-4 text-cyan-400" />
-                <span>২৪/৭ কাস্টমার সাপোর্ট</span>
+                <span>{t('hero_feature_support')}</span>
               </div>
             </div>
           </div>

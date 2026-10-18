@@ -2,6 +2,7 @@ import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { StoreProvider, useStore } from './context/StoreContext';
+import { ThemeLanguageProvider, useThemeLanguage } from './context/ThemeLanguageContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CartDrawer } from './components/CartDrawer';
@@ -14,35 +15,38 @@ import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { TrackOrderPage } from './pages/TrackOrderPage';
 import { AccountPage } from './pages/AccountPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { ShieldCheck, LogIn, ArrowLeft } from 'lucide-react';
-
 import { AdminSecurityGate } from './components/AdminSecurityGate';
 
 const AppContent: React.FC = () => {
   const { currentPage } = useStore();
   const { isAdmin } = useAuth();
+  const { language } = useThemeLanguage();
 
   // Route to Admin Panel
   if (currentPage === 'admin') {
     if (!isAdmin) {
       return (
-        <>
+        <div className={language === 'bn' ? 'font-bengali' : 'font-sans'}>
           <AdminSecurityGate />
           <ToastContainer />
-        </>
+        </div>
       );
     }
 
     return (
-      <>
+      <div className={language === 'bn' ? 'font-bengali' : 'font-sans'}>
         <AdminDashboard />
         <ToastContainer />
-      </>
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#060b15] text-slate-100 flex flex-col font-bengali">
+    <div
+      className={`min-h-screen bg-[#060b15] text-slate-100 flex flex-col transition-colors duration-200 ${
+        language === 'bn' ? 'font-bengali' : 'font-sans'
+      }`}
+    >
       {/* Top Sticky Navigation */}
       <Navbar />
 
@@ -71,12 +75,14 @@ const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <StoreProvider>
-        <CartProvider>
-          <AppContent />
-        </CartProvider>
-      </StoreProvider>
-    </AuthProvider>
+    <ThemeLanguageProvider>
+      <AuthProvider>
+        <StoreProvider>
+          <CartProvider>
+            <AppContent />
+          </CartProvider>
+        </StoreProvider>
+      </AuthProvider>
+    </ThemeLanguageProvider>
   );
 }

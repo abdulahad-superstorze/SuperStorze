@@ -1,21 +1,24 @@
 import React from 'react';
+import { useLanguage } from '../context/ThemeLanguageContext';
 
 export const HowItWorks: React.FC = () => {
+  const { isBangla, t } = useLanguage();
+
   const steps = [
     {
-      num: '১',
-      title: 'প্যাকেজ ও আইডি দিন',
-      desc: 'আপনার পছন্দের গেম বা গিফট কার্ড বেছে নিন এবং আপনার Player ID বা মোবাইল নাম্বার দিন।',
+      num: isBangla ? '১' : '1',
+      title: t('step_1_title'),
+      desc: t('step_1_desc'),
     },
     {
-      num: '২',
-      title: 'বিকাশ / নগদ দিয়ে পে করুন',
-      desc: 'আমাদের পার্সোনাল নাম্বারে Send Money করে Transaction ID বসিয়ে ভেরিফাই করুন, অথবা সরাসরি ওয়ালেট ব্যালেন্স ব্যবহার করুন।',
+      num: isBangla ? '২' : '2',
+      title: t('step_2_title'),
+      desc: t('step_2_desc'),
     },
     {
-      num: '৩',
-      title: 'ইনস্ট্যান্ট ডেলিভারি ও ট্র্যাকিং',
-      desc: 'ডায়মন্ড সরাসরি আইডিতে যুক্ত হবে এবং ডিজিটাল কোড স্ক্রিনে দেখাবে। অর্ডার ট্র্যাকার দিয়ে যেকোনো সময় স্ট্যাটাস চেক করুন।',
+      num: isBangla ? '৩' : '3',
+      title: t('step_3_title'),
+      desc: t('step_3_desc'),
     },
   ];
 
@@ -29,10 +32,10 @@ export const HowItWorks: React.FC = () => {
           {/* Heading */}
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="font-heading font-black text-2xl sm:text-3xl md:text-4xl text-white tracking-tight">
-              সহজ ৩টি ধাপে টপআপ ও ডিজিটাল কার্ড গ্রহণ
+              {t('how_it_works_title')}
             </h2>
             <p className="text-slate-400 text-sm sm:text-base mt-2">
-              নিরাপদ, ঝামেলামুক্ত এবং সম্পূর্ণ স্বয়ংক্রিয় প্রক্রিয়া
+              {t('how_it_works_subtitle')}
             </p>
           </div>
 
@@ -43,7 +46,7 @@ export const HowItWorks: React.FC = () => {
                 key={idx}
                 className="rounded-2xl bg-[#0e172a]/90 border border-slate-800 p-6 relative hover:border-cyan-500/40 transition-colors"
               >
-                {/* Number Badge matching screenshot */}
+                {/* Number Badge */}
                 <div className="w-9 h-9 rounded-xl bg-cyan-950 border border-cyan-800/60 text-cyan-400 font-heading font-bold text-base flex items-center justify-center mb-4">
                   {s.num}
                 </div>

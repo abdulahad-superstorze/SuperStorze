@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
+import { useLanguage } from '../context/ThemeLanguageContext';
 import { createDepositRequest } from '../services/storeService';
 import {
   X,
@@ -10,9 +11,7 @@ import {
   Upload,
   Image as ImageIcon,
   AlertCircle,
-  HelpCircle,
   ArrowRight,
-  ShieldCheck,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -25,6 +24,7 @@ interface DepositModalProps {
 export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { user, profile } = useAuth();
   const { siteSettings, showToast } = useStore();
+  const { isBangla, t } = useLanguage();
 
   const [paymentMethod, setPaymentMethod] = useState<'bKash' | 'Nagad' | 'Rocket' | 'Cellfin' | 'Upay'>('bKash');
   const [amount, setAmount] = useState<string>('500');
@@ -98,7 +98,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedNumber(true);
-    showToast('নাম্বার কপি করা হয়েছে!', 'success');
+    showToast(isBangla ? 'নাম্বার কপি করা হয়েছে!' : 'Number copied to clipboard!', 'success');
     setTimeout(() => setCopiedNumber(false), 2000);
   };
 
@@ -107,12 +107,12 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setErrorMsg('শুধুমাত্র ছবি ফাইল (JPG, PNG, WebP) আপলোড করা যাবে।');
+      setErrorMsg(isBangla ? 'শুধুমাত্র ছবি ফাইল (JPG, PNG, WebP) আপলোড করা যাবে।' : 'Only image files (JPG, PNG, WebP) are allowed.');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg('ছবির সাইজ ৫MB এর বেশি হতে পারবে না।');
+      setErrorMsg(isBangla ? 'ছবির সাইজ ৫MB এর বেশি হতে পারবে না।' : 'File size must be under 5MB.');
       return;
     }
 
@@ -123,10 +123,10 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
       const base64 = event.target?.result as string;
       setScreenshotUrl(base64);
       setIsUploadingImage(false);
-      showToast('স্ক্রিনশট সফলভাবে সিলেক্ট করা হয়েছে!', 'success');
+      showToast(isBangla ? 'স্ক্রিনশট সফলভাবে সিলেক্ট করা হয়েছে!' : 'Screenshot selected successfully!', 'success');
     };
     reader.onerror = () => {
-      setErrorMsg('ছবি পড়তে সমস্যা হয়েছে। দয়া করে অন্য ছবি চেষ্টা করুন।');
+      setErrorMsg(isBangla ? 'ছবি পড়তে সমস্যা হয়েছে। দয়া করে অন্য ছবি চেষ্টা করুন।' : 'Failed to read image.');
       setIsUploadingImage(false);
     };
     reader.readAsDataURL(file);
@@ -137,23 +137,23 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
     setErrorMsg('');
 
     if (!user) {
-      setErrorMsg('ডিপোজিট রিকোয়েস্ট পাঠানোর জন্য অনুগ্রহ করে প্রথমে সাইন ইন করুন।');
+      setErrorMsg(isBangla ? 'ডিপোজিট রিকোয়েস্ট পাঠানোর জন্য অনুগ্রহ করে প্রথমে সাইন ইন করুন।' : 'Please sign in first to submit a deposit request.');
       return;
     }
 
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount < 20) {
-      setErrorMsg('সর্বনিম্ন ডিপোজিট পরিমাণ ৳ ২০ টাকা।');
+      setErrorMsg(isBangla ? 'সর্বনিম্ন ডিপোজিট পরিমাণ ৳ ২০ টাকা।' : 'Minimum deposit amount is ৳ 20.');
       return;
     }
 
     if (!senderNumber.trim() || senderNumber.trim().length < 11) {
-      setErrorMsg('সঠিক ১১ ডিজিটের প্রেরক মোবাইল নাম্বার লিখুন।');
+      setErrorMsg(isBangla ? 'সঠিক ১১ ডিজিটের প্রেরক মোবাইল নাম্বার লিখুন।' : 'Enter a valid 11-digit sender phone number.');
       return;
     }
 
     if (!transactionId.trim() || transactionId.trim().length < 4) {
-      setErrorMsg('সঠিক লেনদেন আইডি (Transaction ID / TrxID) লিখুন।');
+      setErrorMsg(isBangla ? 'সঠিক লেনদেন আইডি (Transaction ID / TrxID) লিখুন।' : 'Enter a valid Transaction ID (TrxID).');
       return;
     }
 
@@ -173,7 +173,9 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
       });
 
       showToast(
-        `ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে! এডমিন ভেরিফাই করে কিছুক্ষণের মধ্যে ৳${numAmount} যুক্ত করবেন।`,
+        isBangla
+          ? `ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে! এডমিন ভেরিফাই করে কিছুক্ষণের মধ্যে ৳${numAmount} যুক্ত করবেন।`
+          : `Deposit request submitted! Admin will verify and credit ৳${numAmount} shortly.`,
         'success'
       );
 
@@ -186,7 +188,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Deposit submission error:', err);
-      setErrorMsg(err.message || 'ডিপোজিট রিকোয়েস্ট জমা দেওয়া সম্ভব হয়নি। আবার চেষ্টা করুন।');
+      setErrorMsg(err.message || (isBangla ? 'ডিপোজিট রিকোয়েস্ট জমা দেওয়া সম্ভব হয়নি। আবার চেষ্টা করুন।' : 'Failed to submit request.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -201,7 +203,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-colors"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -213,10 +215,10 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
           </div>
           <div>
             <h2 className="font-heading font-black text-xl sm:text-2xl text-white">
-              ওয়ালেট ডিপোজিট (ম্যানুয়াল)
+              {t('deposit_modal_title')}
             </h2>
             <p className="text-xs text-slate-400">
-              বিকাশ, নগদ বা রকেটে টাকা পাঠিয়ে TrxID ও স্ক্রিনশট সাবমিট করুন
+              {t('deposit_modal_sub')}
             </p>
           </div>
         </div>
@@ -232,20 +234,20 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
           {/* Step 1: Select Payment Method */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-2">
-              ১. পেমেন্ট মাধ্যম নির্বাচন করুন:
+              {isBangla ? '১. পেমেন্ট মাধ্যম নির্বাচন করুন:' : '1. Select Payment Method:'}
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {[
-                { id: 'bKash', label: 'বিকাশ (bKash)', bg: 'hover:border-pink-500' },
-                { id: 'Nagad', label: 'নগদ (Nagad)', bg: 'hover:border-orange-500' },
-                { id: 'Rocket', label: 'রকেট (Rocket)', bg: 'hover:border-purple-500' },
-                { id: 'Cellfin', label: 'সেলফিন/উপায়', bg: 'hover:border-cyan-500' },
+                { id: 'bKash', label: 'bKash', bg: 'hover:border-pink-500' },
+                { id: 'Nagad', label: 'Nagad', bg: 'hover:border-orange-500' },
+                { id: 'Rocket', label: 'Rocket', bg: 'hover:border-purple-500' },
+                { id: 'Cellfin', label: 'Cellfin/Upay', bg: 'hover:border-cyan-500' },
               ].map((m) => (
                 <button
                   key={m.id}
                   type="button"
                   onClick={() => setPaymentMethod(m.id as any)}
-                  className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                  className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${
                     paymentMethod === m.id
                       ? `${target.bgActive} shadow-md`
                       : 'bg-[#060c18] border-slate-800 text-slate-300 ' + m.bg
@@ -263,7 +265,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-xs font-bold uppercase tracking-wider ${target.textColor}`}>
-                    {paymentMethod} একাউন্ট নাম্বার:
+                    {paymentMethod} {isBangla ? 'একাউন্ট নাম্বার:' : 'Account Number:'}
                   </span>
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                     {target.type}
@@ -273,17 +275,19 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
                   {target.number}
                 </div>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  অ্যাপ থেকে এই নাম্বারে <strong className="text-slate-200">Send Money</strong> করুন।
+                  {isBangla
+                    ? <>অ্যাপ থেকে এই নাম্বারে <strong className="text-slate-200">Send Money</strong> করুন।</>
+                    : <>Send money to this number via your {paymentMethod} app.</>}
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={() => copyToClipboard(target.number)}
-                className="self-start sm:self-center px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white border border-slate-700 font-semibold text-xs transition-all flex items-center gap-1.5 active:scale-95"
+                className="self-start sm:self-center px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white border border-slate-700 font-semibold text-xs transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
               >
                 {copiedNumber ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                <span>{copiedNumber ? 'কপি হয়েছে' : 'নাম্বার কপি'}</span>
+                <span>{copiedNumber ? (isBangla ? 'কপি হয়েছে' : 'Copied') : (isBangla ? 'নাম্বার কপি' : 'Copy Number')}</span>
               </button>
             </div>
           </div>
@@ -292,9 +296,11 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold text-slate-300">
-                ২. জমার পরিমাণ (টাকা):
+                {isBangla ? '২. জমার পরিমাণ (টাকা):' : '2. Deposit Amount (BDT):'}
               </label>
-              <span className="text-[11px] text-slate-400 font-mono">সর্বনিম্ন: ৳২০</span>
+              <span className="text-[11px] text-slate-400 font-mono">
+                {isBangla ? 'সর্বনিম্ন: ৳২০' : 'Minimum: ৳20'}
+              </span>
             </div>
 
             <div className="relative mb-2">
@@ -320,7 +326,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
                   key={amt}
                   type="button"
                   onClick={() => setAmount(amt)}
-                  className={`px-3 py-1 rounded-lg text-xs font-mono font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer ${
                     amount === amt
                       ? 'bg-cyan-500 text-black font-bold'
                       : 'bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700'
@@ -336,7 +342,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                ৩. যে নাম্বার থেকে পাঠিয়েছেন (Sender No):
+                {isBangla ? '৩. প্রেরক মোবাইল নাম্বার (Sender No):' : '3. Sender Phone Number:'}
               </label>
               <input
                 type="tel"
@@ -350,7 +356,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                ৪. ট্রানজেকশন আইডি (TrxID):
+                {isBangla ? '৪. ট্রানজেকশন আইডি (TrxID):' : '4. Transaction ID (TrxID):'}
               </label>
               <input
                 type="text"
@@ -368,9 +374,11 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
-                <span>৫. পেমেন্ট কনফার্মেশন স্ক্রিনশট (প্রুফ):</span>
+                <span>{isBangla ? '৫. পেমেন্ট কনফার্মেশন স্ক্রিনশট (প্রুফ):' : '5. Payment Screenshot (Optional):'}</span>
               </label>
-              <span className="text-[11px] text-cyan-400">খুব দ্রুত ভেরিফিকেশনের জন্য জরুরি</span>
+              <span className="text-[11px] text-cyan-400">
+                {isBangla ? 'খুব দ্রুত ভেরিফিকেশনের জন্য জরুরি' : 'Recommended for fast verification'}
+              </span>
             </div>
 
             <input
@@ -393,10 +401,10 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-white flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>স্ক্রিনশট যোগ করা হয়েছে</span>
+                    <span>{isBangla ? 'স্ক্রিনশট যোগ করা হয়েছে' : 'Screenshot attached'}</span>
                   </p>
                   <p className="text-[11px] text-slate-400 mt-0.5">
-                    এডমিন এই স্ক্রিনশট দেখে সাথে সাথে ভেরিফাই করবেন।
+                    {isBangla ? 'এডমিন এই স্ক্রিনশট দেখে সাথে সাথে ভেরিফাই করবেন।' : 'Admin will use this to verify quickly.'}
                   </p>
                   <button
                     type="button"
@@ -404,9 +412,9 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
                       setScreenshotUrl('');
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
-                    className="text-[11px] text-rose-400 hover:text-rose-300 mt-2 font-semibold underline"
+                    className="text-[11px] text-rose-400 hover:text-rose-300 mt-2 font-semibold underline cursor-pointer"
                   >
-                    ছবিটি মুছে অন্য ছবি দিন
+                    {isBangla ? 'ছবিটি মুছে অন্য ছবি দিন' : 'Remove & upload another'}
                   </button>
                 </div>
               </div>
@@ -421,9 +429,11 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
                   <Upload className="w-5 h-5" />
                 </div>
                 <div className="text-xs">
-                  <span className="text-cyan-400 font-bold">এখানে ক্লিক করে স্ক্রিনশট আপলোড করুন</span>
+                  <span className="text-cyan-400 font-bold">
+                    {isBangla ? 'এখানে ক্লিক করে স্ক্রিনশট আপলোড করুন' : 'Click to upload payment screenshot'}
+                  </span>
                   <p className="text-[10px] text-slate-400 mt-0.5">
-                    (বিকাশ/নগদ অ্যাপের কনফার্মেশন স্ক্রিন বা SMS স্ক্রিনশট, সর্বোচ্চ ৫MB)
+                    {isBangla ? '(বিকাশ/নগদ অ্যাপের কনফার্মেশন স্ক্রিন বা SMS স্ক্রিনশট, সর্বোচ্চ ৫MB)' : '(App confirmation screen or SMS, max 5MB)'}
                   </p>
                 </div>
               </button>
@@ -433,13 +443,13 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
           {/* Optional Note */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              অতিরিক্ত কোনো মন্তব্য (ঐচ্ছিক):
+              {isBangla ? 'অতিরিক্ত কোনো মন্তব্য (ঐচ্ছিক):' : 'Additional Note (Optional):'}
             </label>
             <input
               type="text"
               value={userNote}
               onChange={(e) => setUserNote(e.target.value)}
-              placeholder="যেমন: দ্রুত ভেরিফাই করে দিন..."
+              placeholder={isBangla ? 'যেমন: দ্রুত ভেরিফাই করে দিন...' : 'e.g. Please approve quickly...'}
               className="w-full bg-[#060c18] border border-slate-800 focus:border-cyan-500 rounded-xl py-2 px-3 text-white text-xs focus:outline-none"
             />
           </div>
@@ -452,7 +462,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
                 onClick={onClose}
                 className="py-3.5 px-5 rounded-2xl bg-[#0e172a] hover:bg-slate-800 text-slate-300 hover:text-white font-semibold text-xs border border-slate-800 transition-all cursor-pointer"
               >
-                ← পেছনে যান
+                {isBangla ? '← পেছনে যান' : 'Cancel'}
               </button>
 
               <button
@@ -463,11 +473,11 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
                 {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                    <span>রিকোয়েস্ট পাঠানো হচ্ছে...</span>
+                    <span>{isBangla ? 'রিকোয়েস্ট পাঠানো হচ্ছে...' : 'Submitting...'}</span>
                   </>
                 ) : (
                   <>
-                    <span>ডিপোজিট নিশ্চিত করুন</span>
+                    <span>{isBangla ? 'ডিপোজিট নিশ্চিত করুন' : 'Confirm Deposit'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -475,7 +485,9 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
             </div>
 
             <p className="text-[10px] text-slate-400 text-center mt-2.5">
-              🔒 আপনার লেনদেন সম্পূর্ণ নিরাপদ। এডমিন ভেরিফাই করামাত্র স্বয়ংক্রিয়ভাবে ওয়ালেট ব্যালেন্স বাড়বে।
+              {isBangla
+                ? '🔒 আপনার লেনদেন সম্পূর্ণ নিরাপদ। এডমিন ভেরিফাই করামাত্র স্বয়ংক্রিয়ভাবে ওয়ালেট ব্যালেন্স বাড়বে।'
+                : '🔒 100% secure transaction. Balance will be updated as soon as admin verifies.'}
             </p>
           </div>
         </form>

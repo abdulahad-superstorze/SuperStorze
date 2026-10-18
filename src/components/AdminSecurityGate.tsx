@@ -2,22 +2,16 @@ import React, { useState } from 'react';
 import { useAuth, AUTHORIZED_ADMIN_EMAIL } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import {
-  ShieldAlert,
-  KeyRound,
   LogIn,
   ArrowLeft,
-  Eye,
-  EyeOff,
   AlertCircle,
   Lock,
 } from 'lucide-react';
 
 export const AdminSecurityGate: React.FC = () => {
-  const { loginWithGoogle, verifyAdminPasscode } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const { navigateTo } = useStore();
 
-  const [passcode, setPasscode] = useState('');
-  const [showPasscode, setShowPasscode] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,29 +21,14 @@ export const AdminSecurityGate: React.FC = () => {
     try {
       const loggedUser = await loginWithGoogle();
       if (!loggedUser) {
-        setErrorMessage('লগইন বাতিল বা ব্যর্থ হয়েছে।');
-      } else if (loggedUser.email !== AUTHORIZED_ADMIN_EMAIL) {
-        // Completely confidential error: never reveal the expected email address
-        setErrorMessage('অ্যাক্সেস ডিনাইড! এই গুগল অ্যাকাউন্টটি অনুমোদিত এডমিন হিসেবে তালিকাভুক্ত নয়।');
+        setErrorMessage('লগইন বাতিল বা ব্যর্থ হয়েছে। দয়া করে আবার চেষ্টা করুন।');
+      } else if (!loggedUser.email || loggedUser.email.trim().toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+        setErrorMessage('অ্যাক্সেস ডিনাইড! শুধুমাত্র অনুমোদিত নির্দিষ্ট এডমিন আইডি দিয়ে লগইন করলেই এডমিন প্যানেল অন হবে, অন্য কোনো একাউন্টে এডমিন এক্সেস দেওয়া হবে না।');
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'অথেন্টিকেশন ব্যর্থ হয়েছে');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage('');
-    if (!passcode.trim()) {
-      setErrorMessage('সিকিউরিটি পাসকোড লিখুন');
-      return;
-    }
-
-    const success = verifyAdminPasscode(passcode);
-    if (!success) {
-      setErrorMessage('ভুল সিকিউরিটি পাসকোড! অনুমতি ছাড়া এডমিন প্যানেলে প্রবেশ নিষেধ।');
     }
   };
 
@@ -70,7 +49,7 @@ export const AdminSecurityGate: React.FC = () => {
             এডমিন কন্ট্রোল প্যানেল
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            সংরক্ষিত এলাকা: শুধুমাত্র অনুমোদিত এডমিনের জন্য
+            সংরক্ষিত এলাকা: শুধুমাত্র নির্দিষ্ট এডমিন আইডি দিয়ে লগইন করলেই এডমিন অন হবে
           </p>
         </div>
 
@@ -83,11 +62,11 @@ export const AdminSecurityGate: React.FC = () => {
         )}
 
         <div className="space-y-5">
-          {/* Method: Google Owner Login (No email shown) */}
+          {/* Method: Google Owner Login via Supabase OAuth */}
           <div className="p-5 rounded-2xl bg-[#0d1629] border border-slate-800 space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-200">অনুমোদিত গুগল একাউন্ট সাইন-ইন:</span>
-              <span className="text-[10px] text-cyan-400 font-mono">Verified Google OAuth</span>
+              <span className="font-semibold text-slate-200">এডমিন গুগল একাউন্ট সাইন-ইন:</span>
+              <span className="text-[10px] text-cyan-400 font-mono">Supabase Google Auth</span>
             </div>
 
             <button
@@ -99,7 +78,7 @@ export const AdminSecurityGate: React.FC = () => {
               <span>{loading ? 'অথেন্টিকেশন ভেরিফাই হচ্ছে...' : 'Google দিয়ে সাইন ইন করুন (Admin Sign-In)'}</span>
             </button>
             <p className="text-[11px] text-slate-400 text-center leading-relaxed">
-              শুধুমাত্র অনুমোদিত নির্দিষ্ট স্টোর ওনার গুগল একাউন্ট দিয়ে সাইন ইন করলে এডমিন কন্ট্রোল এক্সেস প্রদান করা হবে।
+              শুধুমাত্র অনুমোদিত এডমিন গুগল একাউন্ট দিয়ে সাইন ইন করলেই এডমিন কন্ট্রোল এক্সেস প্রদান করা হবে।
             </p>
           </div>
         </div>
@@ -107,7 +86,7 @@ export const AdminSecurityGate: React.FC = () => {
         {/* Back button */}
         <button
           onClick={() => navigateTo('home')}
-          className="w-full py-2 text-xs text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition-colors"
+          className="w-full py-2 text-xs text-slate-400 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>মূল ওয়েবসাইটে ফিরে যান</span>

@@ -1,18 +1,28 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, signInWithPopup, signOut as fbSignOut, onAuthStateChanged } from 'firebase/auth';
+import { User as FirebaseUser, signInWithPopup, signOut as fbSignOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { UserProfile } from '../types';
 import { getOrCreateUserProfile, updateUserWallet, initializeDatabaseIfEmpty } from '../services/storeService';
 
 export const AUTHORIZED_ADMIN_EMAIL = 'abdulahad.onr2@gmail.com';
-const ADMIN_MASTER_PASSCODES = ['superstorez2026', 'admin786', 'superadmin@2026'];
+
+export interface AppUser {
+  uid: string;
+  id: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL?: string | null;
+}
+
+export type User = AppUser;
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   profile: UserProfile | null;
   isAdmin: boolean;
   loading: boolean;
-  loginWithGoogle: () => Promise<User | null>;
+  loginWithGoogle: () => Promise<AppUser | null>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   deductWalletBalance: (amount: number) => Promise<boolean>;
@@ -24,66 +34,83 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function mapSupabaseUser(su: any): AppUser {
+  return {
+    uid: su.id,
+    id: su.id,
+    email: su.email || null,
+    displayName:
+      su.user_metadata?.full_name ||
+      su.user_metadata?.name ||
+      su.user_metadata?.displayName ||
+      su.email?.split('@')[0] ||
+      'Customer',
+    photoURL: su.user_metadata?.avatar_url || su.user_metadata?.picture || undefined,
+  };
+}
+
+function mapFirebaseUser(fu: FirebaseUser): AppUser {
+  return {
+    uid: fu.uid,
+    id: fu.uid,
+    email: fu.email,
+    displayName: fu.displayName || fu.email?.split('@')[0] || 'Customer',
+    photoURL: fu.photoURL || undefined,
+  };
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  
-  // Secure session verification (Persisted in localStorage so you stay logged in automatically)
-  const [adminSessionVerified, setAdminSessionVerified] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('ssbd_admin_token') === 'verified_session';
-    } catch {
-      return false;
-    }
-  });
 
-  const verifyAdminPasscode = (code: string): boolean => {
-    const clean = code.trim().toLowerCase();
-    if (ADMIN_MASTER_PASSCODES.includes(clean)) {
-      setAdminSessionVerified(true);
-      try {
-        localStorage.setItem('ssbd_admin_token', 'verified_session');
-      } catch {
-        // ignore
-      }
-      return true;
-    }
+  // Strictly enforce admin access only if logged in as AUTHORIZED_ADMIN_EMAIL
+  const [adminSessionVerified, setAdminSessionVerified] = useState<boolean>(false);
+
+  const verifyAdminPasscode = (_code: string): boolean => {
+    // Only the authorized admin email gets admin access
     return false;
   };
 
   const revokeAdminSession = () => {
     setAdminSessionVerified(false);
-    try {
-      localStorage.removeItem('ssbd_admin_token');
-    } catch {
-      // ignore
-    }
   };
 
-  const syncProfile = async (firebaseUser: User | null) => {
-    if (!firebaseUser) {
+  const syncProfile = async (authUser: AppUser | null) => {
+    if (!authUser) {
       setProfile(null);
       setLoading(false);
       return;
     }
+    const isOwnerAdmin =
+      Boolean(authUser.email && authUser.email.trim().toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase());
+
     try {
       const p = await getOrCreateUserProfile({
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
+        uid: authUser.uid,
+        email: authUser.email,
+        displayName: authUser.displayName,
+        photoURL: authUser.photoURL,
       });
+      if (p) {
+        // Enforce role strictly: only the designated email can ever be admin
+        p.role = isOwnerAdmin ? 'admin' : 'customer';
+
+        const bal = Number(p.walletBalance);
+        if (bal === 850 || bal === 800 || (p.walletBalance as any) === '850' || (p.walletBalance as any) === '800') {
+          p.walletBalance = 0;
+        }
+      }
       setProfile(p);
     } catch (err) {
       console.warn('Profile sync fallback:', err);
       setProfile({
-        uid: firebaseUser.uid,
-        email: firebaseUser.email || '',
-        displayName: firebaseUser.displayName || 'Gamer',
-        photoURL: firebaseUser.photoURL || undefined,
-        walletBalance: 850,
-        role: firebaseUser.email === AUTHORIZED_ADMIN_EMAIL ? 'admin' : 'customer',
+        uid: authUser.uid,
+        email: authUser.email || '',
+        displayName: authUser.displayName || 'Gamer',
+        photoURL: authUser.photoURL || undefined,
+        walletBalance: 0,
+        role: isOwnerAdmin ? 'admin' : 'customer',
       });
     } finally {
       setLoading(false);
@@ -91,25 +118,118 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      await syncProfile(u);
-      if (u?.email === AUTHORIZED_ADMIN_EMAIL) {
-        initializeDatabaseIfEmpty().catch(() => {});
+    let isMounted = true;
+
+    // 1. Check existing Supabase session on startup
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        const mapped = mapSupabaseUser(session.user);
+        setUser(mapped);
+        syncProfile(mapped);
+        if (mapped.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+          initializeDatabaseIfEmpty().catch(() => {});
+        }
       }
     });
-    return () => unsubscribe();
+
+    // 2. Subscribe to Supabase Auth state changes (OAuth signInWithOAuth redirect / login)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        const mapped = mapSupabaseUser(session.user);
+        setUser(mapped);
+        await syncProfile(mapped);
+        if (mapped.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+          initializeDatabaseIfEmpty().catch(() => {});
+        }
+      } else {
+        // Fallback: check Firebase user if present
+        const fbUser = auth.currentUser;
+        if (fbUser) {
+          const mapped = mapFirebaseUser(fbUser);
+          setUser(mapped);
+          await syncProfile(mapped);
+        } else {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
+      }
+    });
+
+    // 3. Fallback: Listen to Firebase Auth state
+    const unsubscribeFb = onAuthStateChanged(auth, async (fbUser) => {
+      if (!isMounted) return;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) {
+        if (fbUser) {
+          const mapped = mapFirebaseUser(fbUser);
+          setUser(mapped);
+          await syncProfile(mapped);
+          if (mapped.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+            initializeDatabaseIfEmpty().catch(() => {});
+          }
+        } else {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+      unsubscribeFb();
+    };
   }, []);
 
-  const loginWithGoogle = async (): Promise<User | null> => {
+  const loginWithGoogle = async (): Promise<AppUser | null> => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      await syncProfile(result.user);
-      return result.user;
+      // Connect Google Sign-In button to Supabase Auth using signInWithOAuth with provider google
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+
+      if (error) {
+        console.warn('Supabase signInWithOAuth error, using popup fallback:', error);
+        const result = await signInWithPopup(auth, googleProvider);
+        if (result.user) {
+          const mapped = mapFirebaseUser(result.user);
+          setUser(mapped);
+          await syncProfile(mapped);
+          return mapped;
+        }
+      }
+
+      if (data?.url) {
+        // In case automatic redirect didn't trigger
+        window.location.href = data.url;
+      }
+      return null;
     } catch (err: any) {
-      console.error('Google Sign-in error:', err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        alert('লগইন ব্যর্থ হয়েছে: ' + (err.message || 'দয়া করে আবার চেষ্টা করুন'));
+      console.warn('Supabase OAuth error, trying popup fallback:', err);
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        if (result.user) {
+          const mapped = mapFirebaseUser(result.user);
+          setUser(mapped);
+          await syncProfile(mapped);
+          return mapped;
+        }
+      } catch (fbErr: any) {
+        console.error('Sign-in error:', fbErr);
+        if (fbErr.code !== 'auth/popup-closed-by-user') {
+          alert('লগইন ব্যর্থ হয়েছে: ' + (err?.message || fbErr?.message || 'দয়া করে আবার চেষ্টা করুন'));
+        }
       }
       return null;
     }
@@ -117,7 +237,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     revokeAdminSession();
-    await fbSignOut(auth);
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('Supabase signout warning:', e);
+    }
+    try {
+      await fbSignOut(auth);
+    } catch (e) {
+      console.warn('Firebase signout warning:', e);
+    }
     setUser(null);
     setProfile(null);
   };
@@ -129,7 +258,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const deductWalletBalance = async (amount: number): Promise<boolean> => {
-    const currentBal = profile?.walletBalance ?? 850;
+    const currentBal = profile?.walletBalance ?? 0;
     if (currentBal < amount) return false;
     const newBal = currentBal - amount;
     if (user) {
@@ -144,7 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addWalletBalance = async (amount: number): Promise<void> => {
-    const currentBal = profile?.walletBalance ?? 850;
+    const currentBal = profile?.walletBalance ?? 0;
     const newBal = currentBal + amount;
     if (user) {
       try {
@@ -156,9 +285,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProfile((prev) => (prev ? { ...prev, walletBalance: newBal } : null));
   };
 
-  // Restrict admin access strictly to the explicitly authorized Google email
+  // Restrict admin access strictly and exclusively to the selected admin email
   const isAdmin = Boolean(
-    user?.email && user.email.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()
+    user?.email && user.email.trim().toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()
   );
 
   return (
