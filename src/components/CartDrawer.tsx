@@ -215,7 +215,7 @@ export const CartDrawer: React.FC = () => {
               <div className="flex items-center justify-between text-sm text-slate-300">
                 <span>{isBangla ? 'সাবটোটাল' : 'Subtotal'}</span>
                 <span className="font-heading font-black text-xl text-cyan-400">
-                  ৳ {subtotal}
+                  ৳ {Number(subtotal || 0).toFixed(2)}
                 </span>
               </div>
               <p className="text-[10px] text-slate-400">

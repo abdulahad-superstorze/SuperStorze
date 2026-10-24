@@ -106,11 +106,15 @@ export const CheckoutPage: React.FC = () => {
 
   const executeOrder = async () => {
     if (isSubmitting) return; // Prevent duplicate clicks
+    if (!user) {
+      showToast('অর্ডার করতে দয়া করে প্রথমে সাইন ইন করুন।', 'error');
+      return;
+    }
     setIsSubmitting(true);
 
     try {
       const order = await placeWalletOrder({
-        userId: user!.uid,
+        userId: user.uid,
         orderData: {
           customerName: customerName.trim(),
           customerPhone: customerPhone.trim(),

@@ -44,6 +44,11 @@ export const ProductDetailsPage: React.FC = () => {
     }
   }, [product?.id]);
 
+  const currentPrice = selectedVariation ? selectedVariation.price : (product?.basePrice ?? 0);
+  const oldPrice = selectedVariation?.oldPrice || product?.oldPrice;
+  const discountPercent = oldPrice && currentPrice ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100) : 0;
+  const isOutOfStock = selectedVariation ? selectedVariation.stock <= 0 : (product ? product.stock <= 0 : false);
+
   // Debounced auto-save to Supabase when custom fields are filled
   useEffect(() => {
     const hasValues = Object.values(customFieldValues).some((v) => v && v.trim().length > 0);
@@ -64,7 +69,7 @@ export const ProductDetailsPage: React.FC = () => {
     }, 1200);
 
     return () => clearTimeout(timer);
-  }, [customFieldValues, selectedVariation?.id, quantity, product?.id]);
+  }, [customFieldValues, selectedVariation?.id, quantity, product?.id, currentPrice]);
 
   if (!product) {
     return (
@@ -79,11 +84,6 @@ export const ProductDetailsPage: React.FC = () => {
       </div>
     );
   }
-
-  const currentPrice = selectedVariation ? selectedVariation.price : product.basePrice;
-  const oldPrice = selectedVariation?.oldPrice || product.oldPrice;
-  const discountPercent = oldPrice ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100) : 0;
-  const isOutOfStock = selectedVariation ? selectedVariation.stock <= 0 : product.stock <= 0;
 
   const validateCustomFields = (): boolean => {
     const errors: Record<string, string> = {};

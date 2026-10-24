@@ -45,15 +45,23 @@ export const AccountPage: React.FC = () => {
       return;
     }
 
-    const unsubOrders = subscribeUserOrders(user.uid, (data) => {
-      setOrders(data);
-      setLoadingOrders(false);
-    });
+    const unsubOrders = subscribeUserOrders(
+      user.uid,
+      (data) => {
+        setOrders(data);
+        setLoadingOrders(false);
+      },
+      () => setLoadingOrders(false)
+    );
 
-    const unsubDeposits = subscribeUserDepositRequests(user.uid, (data) => {
-      setDepositRequests(data);
-      setLoadingDeposits(false);
-    });
+    const unsubDeposits = subscribeUserDepositRequests(
+      user.uid,
+      (data) => {
+        setDepositRequests(data);
+        setLoadingDeposits(false);
+      },
+      () => setLoadingDeposits(false)
+    );
 
     return () => {
       unsubOrders();

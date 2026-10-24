@@ -102,7 +102,38 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
     setTimeout(() => setCopiedNumber(false), 2000);
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+function compressImage(file: File, maxWidth = 800, quality = 0.75): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(img.src);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+}
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -111,25 +142,22 @@ export const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, onS
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg(isBangla ? 'ছবির সাইজ ৫MB এর বেশি হতে পারবে না।' : 'File size must be under 5MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMsg(isBangla ? 'ছবির সাইজ ১০MB এর বেশি হতে পারবে না।' : 'File size must be under 10MB.');
       return;
     }
 
     setErrorMsg('');
     setIsUploadingImage(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setScreenshotUrl(base64);
-      setIsUploadingImage(false);
+    try {
+      const compressed = await compressImage(file);
+      setScreenshotUrl(compressed);
       showToast(isBangla ? 'স্ক্রিনশট সফলভাবে সিলেক্ট করা হয়েছে!' : 'Screenshot selected successfully!', 'success');
-    };
-    reader.onerror = () => {
+    } catch {
       setErrorMsg(isBangla ? 'ছবি পড়তে সমস্যা হয়েছে। দয়া করে অন্য ছবি চেষ্টা করুন।' : 'Failed to read image.');
+    } finally {
       setIsUploadingImage(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

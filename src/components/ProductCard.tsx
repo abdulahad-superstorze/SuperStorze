@@ -12,15 +12,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { navigateTo } = useStore();
   const { isBangla, t } = useLanguage();
 
+  const validVariations = (product.variations || []).filter(
+    (v) => typeof v.price === 'number' && !isNaN(v.price)
+  );
   const minPrice =
-    product.variations && product.variations.length > 0
-      ? Math.min(...product.variations.map((v) => v.price))
-      : product.basePrice;
+    validVariations.length > 0
+      ? Math.min(...validVariations.map((v) => v.price))
+      : (product.basePrice || 0);
 
   const maxPrice =
-    product.variations && product.variations.length > 0
-      ? Math.max(...product.variations.map((v) => v.price))
-      : product.basePrice;
+    validVariations.length > 0
+      ? Math.max(...validVariations.map((v) => v.price))
+      : (product.basePrice || 0);
 
   const priceRange =
     minPrice === maxPrice

@@ -275,9 +275,17 @@ export async function getOrderById(orderId: string): Promise<Order | null> {
   const normalizedId = orderId.trim().toUpperCase();
   const path = `orders/${normalizedId}`;
   try {
-    const snap = await getDoc(doc(db, 'orders', normalizedId));
+    let snap = await getDoc(doc(db, 'orders', normalizedId));
     if (snap.exists()) {
       return { id: snap.id, ...snap.data() } as Order;
+    }
+    // If not found and input didn't have SSBD- prefix, try with prefix
+    if (!normalizedId.startsWith('SSBD-')) {
+      const prefixed = `SSBD-${normalizedId}`;
+      snap = await getDoc(doc(db, 'orders', prefixed));
+      if (snap.exists()) {
+        return { id: snap.id, ...snap.data() } as Order;
+      }
     }
     return null;
   } catch (error) {
@@ -295,6 +303,21 @@ export async function getOrdersByPhone(phone: string): Promise<Order[]> {
     snap.forEach((d) => {
       list.push({ id: d.id, ...d.data() } as Order);
     });
+
+    if (list.length === 0) {
+      // Try alternate format (+880 vs 01...)
+      const altPhone = cleanPhone.startsWith('+88')
+        ? cleanPhone.replace('+88', '')
+        : cleanPhone.startsWith('88')
+        ? cleanPhone.replace('88', '')
+        : `+88${cleanPhone}`;
+      const qAlt = query(collection(db, 'orders'), where('customerPhone', '==', altPhone));
+      const snapAlt = await getDocs(qAlt);
+      snapAlt.forEach((d) => {
+        list.push({ id: d.id, ...d.data() } as Order);
+      });
+    }
+
     return list;
   } catch (error) {
     handleFirestoreError(error, OperationType.LIST, path);

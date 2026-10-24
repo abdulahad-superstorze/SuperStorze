@@ -196,41 +196,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
+          skipBrowserRedirect: true,
         },
       });
 
       if (error) {
-        console.warn('Supabase signInWithOAuth error, using popup fallback:', error);
-        const result = await signInWithPopup(auth, googleProvider);
-        if (result.user) {
-          const mapped = mapFirebaseUser(result.user);
-          setUser(mapped);
-          await syncProfile(mapped);
-          return mapped;
-        }
+        console.warn('Supabase signInWithOAuth error notice:', error);
       }
 
-      if (data?.url) {
-        // In case automatic redirect didn't trigger
-        window.location.href = data.url;
-      }
-      return null;
-    } catch (err: any) {
-      console.warn('Supabase OAuth error, trying popup fallback:', err);
+      // Perform popup sign-in so Google OAuth succeeds inside iframe environments
       try {
         const result = await signInWithPopup(auth, googleProvider);
         if (result.user) {
           const mapped = mapFirebaseUser(result.user);
           setUser(mapped);
           await syncProfile(mapped);
+
+          // Synchronize Google ID Token with Supabase Auth
+          try {
+            const idToken = await result.user.getIdToken();
+            if (idToken) {
+              await supabase.auth.signInWithIdToken({
+                provider: 'google',
+                token: idToken,
+              });
+            }
+          } catch (syncErr) {
+            console.warn('Supabase session token sync notice:', syncErr);
+          }
+
           return mapped;
         }
       } catch (fbErr: any) {
-        console.error('Sign-in error:', fbErr);
-        if (fbErr.code !== 'auth/popup-closed-by-user') {
-          alert('লগইন ব্যর্থ হয়েছে: ' + (err?.message || fbErr?.message || 'দয়া করে আবার চেষ্টা করুন'));
+        if (fbErr.code === 'auth/popup-closed-by-user') {
+          return null;
         }
+        // If in top window and popup failed, redirect using Supabase OAuth URL
+        if (data?.url && window.self === window.top) {
+          window.location.href = data.url;
+          return null;
+        }
+        console.error('Sign-in error:', fbErr);
+        alert('লগইন ব্যর্থ হয়েছে: ' + (fbErr?.message || 'দয়া করে আবার চেষ্টা করুন'));
       }
+
+      return null;
+    } catch (err: any) {
+      console.warn('Google Auth error:', err);
       return null;
     }
   };

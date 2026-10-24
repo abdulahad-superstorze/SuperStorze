@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { useLanguage } from '../context/ThemeLanguageContext';
 import { ProductCard } from '../components/ProductCard';
@@ -10,6 +10,12 @@ export const CatalogPage: React.FC = () => {
   const { isBangla, t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState<string>(selectedCategorySlug || 'all');
   const [sortBy, setSortBy] = useState<'popular' | 'price-low' | 'price-high' | 'name'>('popular');
+
+  useEffect(() => {
+    if (selectedCategorySlug) {
+      setActiveCategory(selectedCategorySlug);
+    }
+  }, [selectedCategorySlug]);
 
   const filteredProducts = useMemo(() => {
     return products
