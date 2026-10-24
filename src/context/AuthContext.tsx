@@ -121,17 +121,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let isMounted = true;
 
     // 1. Check existing Supabase session on startup
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!isMounted) return;
-      if (session?.user) {
-        const mapped = mapSupabaseUser(session.user);
-        setUser(mapped);
-        syncProfile(mapped);
-        if (mapped.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
-          initializeDatabaseIfEmpty().catch(() => {});
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!isMounted) return;
+        if (session?.user) {
+          const mapped = mapSupabaseUser(session.user);
+          setUser(mapped);
+          syncProfile(mapped);
+          if (mapped.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+            initializeDatabaseIfEmpty().catch(() => {});
+          }
         }
-      }
-    });
+      })
+      .catch((err) => {
+        console.warn('Initial Supabase session fetch notice:', err);
+      });
 
     // 2. Subscribe to Supabase Auth state changes (OAuth signInWithOAuth redirect / login)
     const {
