@@ -23,6 +23,12 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   loginWithGoogle: () => Promise<AppUser | null>;
+  signInWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signUpWithEmail: (
+    email: string,
+    password: string,
+    name?: string
+  ) => Promise<{ success: boolean; error?: string; message?: string }>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   deductWalletBalance: (amount: number) => Promise<boolean>;
@@ -30,6 +36,10 @@ interface AuthContextType {
   adminSessionVerified: boolean;
   verifyAdminPasscode: (code: string) => boolean;
   revokeAdminSession: () => void;
+  isAuthModalOpen: boolean;
+  setIsAuthModalOpen: (open: boolean) => void;
+  openAuthModal: () => void;
+  closeAuthModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -194,9 +204,102 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+
+  const openAuthModal = () => setIsAuthModalOpen(true);
+  const closeAuthModal = () => setIsAuthModalOpen(false);
+
+  const signInWithEmail = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
+
+      if (error) {
+        let msg = error.message;
+        if (msg.includes('Invalid login credentials')) {
+          msg = 'ভুল ইমেইল বা পাসওয়ার্ড প্রদান করা হয়েছে। অনুগ্রহ করে সঠিক তথ্য দিন।';
+        } else if (msg.includes('Email not confirmed')) {
+          msg = 'আপনার ইমেইলটি এখনো ভেরিফাই করা হয়নি। অনুগ্রহ করে ইনবক্স চেক করুন।';
+        }
+        return { success: false, error: msg };
+      }
+
+      if (data?.user) {
+        const mapped = mapSupabaseUser(data.user);
+        setUser(mapped);
+        await syncProfile(mapped);
+        if (mapped.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+          initializeDatabaseIfEmpty().catch(() => {});
+        }
+        setIsAuthModalOpen(false);
+        return { success: true };
+      }
+
+      return { success: false, error: 'লগইন সম্পন্ন করা সম্ভব হয়নি।' };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'লগইনে অপ্রত্যাশিত সমস্যা হয়েছে।' };
+    }
+  };
+
+  const signUpWithEmail = async (
+    email: string,
+    password: string,
+    name?: string
+  ): Promise<{ success: boolean; error?: string; message?: string }> => {
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      const { data, error } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password,
+        options: {
+          data: {
+            full_name: name?.trim() || cleanEmail.split('@')[0],
+          },
+        },
+      });
+
+      if (error) {
+        let msg = error.message;
+        if (msg.includes('User already registered')) {
+          msg = 'এই ইমেইলটি ইতিমধ্যে নিবন্ধিত রয়েছে। দয়া করে লগইন করুন।';
+        } else if (msg.includes('Password should be at least')) {
+          msg = 'পাসওয়ার্ডটি কমপক্ষে ৬ অক্ষরের হতে হবে।';
+        }
+        return { success: false, error: msg };
+      }
+
+      if (data?.session?.user) {
+        const mapped = mapSupabaseUser(data.session.user);
+        setUser(mapped);
+        await syncProfile(mapped);
+        if (mapped.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+          initializeDatabaseIfEmpty().catch(() => {});
+        }
+        setIsAuthModalOpen(false);
+        return {
+          success: true,
+          message: 'সফলভাবে একাউন্ট তৈরি এবং লগইন সম্পন্ন হয়েছে!',
+        };
+      }
+
+      return {
+        success: true,
+        message: 'একাউন্ট সফলভাবে তৈরি হয়েছে! আপনি এখন সরাসরি লগইন করতে পারেন।',
+      };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'রেজিস্ট্রেশনে সমস্যা হয়েছে।' };
+    }
+  };
+
   const loginWithGoogle = async (): Promise<AppUser | null> => {
     try {
-      // Connect the Google Sign-In button to Supabase Auth using signInWithOAuth with provider google
+      // 1. Try Supabase Google OAuth
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -204,10 +307,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       });
 
+      // If Supabase OAuth fails or provider is not enabled in Supabase project, fallback to Firebase Google popup
       if (error) {
-        console.error('Supabase signInWithOAuth error:', error);
-        alert('Supabase Google Sign-In Error: ' + error.message);
-        return null;
+        console.warn('Supabase Google OAuth notice (falling back to Google Popup):', error.message);
+        return await loginWithFirebaseGoogle();
       }
 
       // If URL returned and running in iframe, open popup window; otherwise redirect
@@ -221,7 +324,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return null;
     } catch (err: any) {
-      console.warn('Supabase Google Auth error:', err);
+      console.warn('Supabase Google Auth error, trying popup fallback:', err);
+      return await loginWithFirebaseGoogle();
+    }
+  };
+
+  const loginWithFirebaseGoogle = async (): Promise<AppUser | null> => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user) {
+        const mapped = mapFirebaseUser(result.user);
+        setUser(mapped);
+        await syncProfile(mapped);
+        if (mapped.email?.toLowerCase() === AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+          initializeDatabaseIfEmpty().catch(() => {});
+        }
+        setIsAuthModalOpen(false);
+        return mapped;
+      }
+      return null;
+    } catch (fbErr: any) {
+      if (fbErr.code === 'auth/popup-closed-by-user') {
+        return null;
+      }
+      console.error('Google Sign-in error:', fbErr);
+      alert('গুগল লগইন ব্যর্থ হয়েছে: ' + (fbErr?.message || 'দয়া করে আবার চেষ্টা করুন'));
       return null;
     }
   };
@@ -289,6 +416,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         loading,
         loginWithGoogle,
+        signInWithEmail,
+        signUpWithEmail,
         logout,
         refreshProfile,
         deductWalletBalance,
@@ -296,6 +425,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         adminSessionVerified,
         verifyAdminPasscode,
         revokeAdminSession,
+        isAuthModalOpen,
+        setIsAuthModalOpen,
+        openAuthModal,
+        closeAuthModal,
       }}
     >
       {children}

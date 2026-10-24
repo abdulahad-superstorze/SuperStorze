@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export const AccountPage: React.FC = () => {
-  const { user, profile, loginWithGoogle } = useAuth();
+  const { user, profile, loginWithGoogle, openAuthModal } = useAuth();
   const { navigateTo } = useStore();
   const { isBangla, t } = useLanguage();
 
@@ -83,13 +83,23 @@ export const AccountPage: React.FC = () => {
             ? 'আপনার ওয়ালেট ব্যালেন্স দেখা, টাকা ডিপোজিট করা এবং পূর্বের অর্ডার হিস্ট্রি ট্র্যাক করার জন্য সাইন ইন করুন।'
             : 'Sign in to check your wallet balance, deposit funds, and track your orders.'}
         </p>
-        <button
-          onClick={loginWithGoogle}
-          className="w-full py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 cursor-pointer"
-        >
-          <LogIn className="w-4 h-4" />
-          <span>{isBangla ? 'Google দিয়ে সাইন ইন করুন' : 'Sign in with Google'}</span>
-        </button>
+        <div className="space-y-3">
+          <button
+            onClick={openAuthModal}
+            className="w-full py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 cursor-pointer"
+          >
+            <LogIn className="w-4 h-4" />
+            <span>{isBangla ? 'ইমেইল অথবা Google দিয়ে সাইন ইন / রেজিস্ট্রেশন' : 'Sign In with Email or Google'}</span>
+          </button>
+
+          <button
+            onClick={loginWithGoogle}
+            className="w-full py-2.5 rounded-xl bg-[#0d1629] hover:bg-[#121f38] border border-slate-700/80 hover:border-cyan-500/50 text-white font-medium text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <LogIn className="w-4 h-4 text-cyan-400" />
+            <span>{isBangla ? 'সরাসরি Google দিয়ে লগইন' : 'Direct Google Sign In'}</span>
+          </button>
+        </div>
       </div>
     );
   }

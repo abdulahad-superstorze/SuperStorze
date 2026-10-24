@@ -9,11 +9,38 @@ import {
 } from 'lucide-react';
 
 export const AdminSecurityGate: React.FC = () => {
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, signInWithEmail } = useAuth();
   const { navigateTo } = useStore();
 
+  const [adminEmail, setAdminEmail] = useState(AUTHORIZED_ADMIN_EMAIL);
+  const [adminPassword, setAdminPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleEmailAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    if (adminEmail.trim().toLowerCase() !== AUTHORIZED_ADMIN_EMAIL.toLowerCase()) {
+      setErrorMessage(
+        'অ্যাক্সেস ডিনাইড! শুধুমাত্র অনুমোদিত এডমিন ইমেইল (' +
+          AUTHORIZED_ADMIN_EMAIL +
+          ') দিয়ে লগইন করলেই এডমিন প্যানেল সচল হবে।'
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await signInWithEmail(adminEmail, adminPassword);
+      if (!res.success) {
+        setErrorMessage(res.error || 'এডমিন লগইন ব্যর্থ হয়েছে।');
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'অথেন্টিকেশন ত্রুটি');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoogleAdminLogin = async () => {
     setLoading(true);
@@ -61,26 +88,71 @@ export const AdminSecurityGate: React.FC = () => {
           </div>
         )}
 
-        <div className="space-y-5">
-          {/* Method: Google Owner Login via Supabase OAuth */}
-          <div className="p-5 rounded-2xl bg-[#0d1629] border border-slate-800 space-y-3">
+        <div className="space-y-4">
+          {/* Method 1: Email & Password Admin Sign-In */}
+          <form onSubmit={handleEmailAdminLogin} className="p-5 rounded-2xl bg-[#0d1629] border border-slate-800 space-y-3.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-200">এডমিন গুগল একাউন্ট সাইন-ইন:</span>
-              <span className="text-[10px] text-cyan-400 font-mono">Supabase Google Auth</span>
+              <span className="font-semibold text-slate-200">এডমিন ইমেইল ও পাসওয়ার্ড:</span>
+              <span className="text-[10px] text-cyan-400 font-mono">Email Sign-In</span>
+            </div>
+
+            <div>
+              <input
+                type="email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                placeholder="abdulahad.onr2@gmail.com"
+                required
+                className="w-full bg-[#060c18] border border-slate-800 focus:border-cyan-500 rounded-xl py-2.5 px-3.5 text-xs text-white focus:outline-none transition-colors font-mono"
+              />
+            </div>
+
+            <div>
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="এডমিন পাসওয়ার্ড লিখুন"
+                required
+                className="w-full bg-[#060c18] border border-slate-800 focus:border-cyan-500 rounded-xl py-2.5 px-3.5 text-xs text-white focus:outline-none transition-colors"
+              />
             </div>
 
             <button
-              onClick={handleGoogleAdminLogin}
+              type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-heading font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-cyan-500/20 active:scale-[0.99] cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-heading font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-cyan-500/20 active:scale-[0.99] cursor-pointer"
             >
-              <LogIn className="w-4 h-4" />
-              <span>{loading ? 'অথেন্টিকেশন ভেরিফাই হচ্ছে...' : 'Google দিয়ে সাইন ইন করুন (Admin Sign-In)'}</span>
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <LogIn className="w-4 h-4" />
+                  <span>ইমেইল দিয়ে এডমিন লগইন (Sign In)</span>
+                </>
+              )}
             </button>
-            <p className="text-[11px] text-slate-400 text-center leading-relaxed">
-              শুধুমাত্র অনুমোদিত এডমিন গুগল একাউন্ট দিয়ে সাইন ইন করলেই এডমিন কন্ট্রোল এক্সেস প্রদান করা হবে।
-            </p>
+          </form>
+
+          {/* Divider */}
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-slate-800"></div>
+            <span className="flex-shrink mx-4 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+              অথবা Google দিয়ে
+            </span>
+            <div className="flex-grow border-t border-slate-800"></div>
           </div>
+
+          {/* Method 2: Google Sign-In */}
+          <button
+            type="button"
+            onClick={handleGoogleAdminLogin}
+            disabled={loading}
+            className="w-full py-2.5 rounded-xl bg-[#0d1629] hover:bg-[#121f38] border border-slate-700/80 hover:border-cyan-500/50 text-white font-medium text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <LogIn className="w-4 h-4 text-cyan-400" />
+            <span>Google একাউন্ট দিয়ে এডমিন সাইন-ইন</span>
+          </button>
         </div>
 
         {/* Back button */}

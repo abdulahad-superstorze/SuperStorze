@@ -23,7 +23,7 @@ import {
 
 export const Navbar: React.FC = () => {
   const { siteSettings, currentPage, navigateTo, searchTerm, setSearchTerm } = useStore();
-  const { user, profile, isAdmin, loginWithGoogle, logout } = useAuth();
+  const { user, profile, isAdmin, loginWithGoogle, openAuthModal, logout } = useAuth();
   const { itemCount, setIsCartOpen } = useCart();
   const { theme, toggleTheme, language, toggleLanguage, t } = useThemeLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -175,7 +175,7 @@ export const Navbar: React.FC = () => {
                 </button>
               ) : (
                 <button
-                  onClick={loginWithGoogle}
+                  onClick={openAuthModal}
                   className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/50 hover:border-cyan-400 transition-all text-xs sm:text-sm text-cyan-300 font-semibold cursor-pointer shadow-sm shadow-cyan-500/10 active:scale-95"
                 >
                   <span>{t('nav_login')}</span>

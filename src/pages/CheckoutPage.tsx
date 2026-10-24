@@ -25,7 +25,7 @@ import {
 export const CheckoutPage: React.FC = () => {
   const { items, subtotal, clearCart } = useCart();
   const { navigateTo, showToast } = useStore();
-  const { user, profile, loginWithGoogle } = useAuth();
+  const { user, profile, loginWithGoogle, openAuthModal } = useAuth();
   const { isBangla, t } = useLanguage();
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
@@ -88,7 +88,8 @@ export const CheckoutPage: React.FC = () => {
     e.preventDefault();
 
     if (!user) {
-      showToast('অর্ডার করতে দয়া করে প্রথমে Google দিয়ে সাইন ইন করুন।', 'error');
+      showToast('অর্ডার করতে দয়া করে প্রথমে সাইন ইন করুন।', 'error');
+      openAuthModal();
       return;
     }
 
@@ -181,7 +182,7 @@ export const CheckoutPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Guest Warning / Google Login Prompt */}
+      {/* Guest Warning / Login Prompt */}
       {!user && (
         <div className="mb-6 p-5 rounded-2xl bg-cyan-950/40 border border-cyan-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -190,16 +191,16 @@ export const CheckoutPage: React.FC = () => {
               <span>ওয়ালেট চেকআউট করতে সাইন ইন করুন</span>
             </h3>
             <p className="text-xs text-slate-300 mt-0.5">
-              প্রোডাক্ট কিনতে এবং ব্যালেন্স ব্যবহার করতে আপনার Google একাউন্টে সাইন ইন থাকা আবশ্যক।
+              প্রোডাক্ট কিনতে এবং ওয়ালেট ব্যালেন্স ব্যবহার করতে আপনার একাউন্টে সাইন ইন থাকা আবশ্যক।
             </p>
           </div>
           <button
             type="button"
-            onClick={loginWithGoogle}
+            onClick={openAuthModal}
             className="px-4 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-md shadow-cyan-500/20 cursor-pointer self-start sm:self-auto"
           >
             <LogIn className="w-4 h-4" />
-            <span>Google দিয়ে সাইন ইন</span>
+            <span>লগইন / সাইন ইন করুন</span>
           </button>
         </div>
       )}

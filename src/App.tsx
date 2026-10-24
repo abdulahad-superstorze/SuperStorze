@@ -16,6 +16,7 @@ import { TrackOrderPage } from './pages/TrackOrderPage';
 import { AccountPage } from './pages/AccountPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminSecurityGate } from './components/AdminSecurityGate';
+import { AuthModal } from './components/AuthModal';
 
 const AppContent: React.FC = () => {
   const { currentPage } = useStore();
@@ -29,6 +30,7 @@ const AppContent: React.FC = () => {
         <div className={language === 'bn' ? 'font-bengali' : 'font-sans'}>
           <AdminSecurityGate />
           <ToastContainer />
+          <AuthModal />
         </div>
       );
     }
@@ -37,6 +39,7 @@ const AppContent: React.FC = () => {
       <div className={language === 'bn' ? 'font-bengali' : 'font-sans'}>
         <AdminDashboard />
         <ToastContainer />
+        <AuthModal />
       </div>
     );
   }
@@ -69,6 +72,9 @@ const AppContent: React.FC = () => {
 
       {/* Toast System */}
       <ToastContainer />
+
+      {/* Auth Modal for Email & Google Sign-In */}
+      <AuthModal />
     </div>
   );
 };
