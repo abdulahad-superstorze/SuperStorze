@@ -78,6 +78,16 @@ import {
   ArrowDownRight,
   History,
   Database,
+  Bell,
+  Headphones,
+  MessageSquare,
+  Share2,
+  Sliders,
+  Globe,
+  Shield,
+  Phone,
+  Mail,
+  Send,
 } from 'lucide-react';
 
 type AdminTab =
@@ -113,6 +123,8 @@ export const AdminDashboard: React.FC = () => {
 
   // Settings Form State
   const [settingsForm, setSettingsForm] = useState<SiteSettings>(siteSettings);
+  const [settingsSubTab, setSettingsSubTab] = useState<'banner' | 'hero' | 'support' | 'trust' | 'general' | 'social' | 'footer'>('banner');
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Deposit Requests State
   const [depositRequests, setDepositRequests] = useState<DepositRequest[]>([]);
@@ -419,14 +431,17 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // Save Settings
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveSettings = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsSavingSettings(true);
     try {
       await updateSiteSettings(settingsForm);
-      showToast('সাইট ও পেমেন্ট সেটিংস সংরক্ষণ করা হয়েছে!', 'success');
-    } catch (err) {
+      showToast('সাইট ও কন্টেন্ট সেটিংস সফলভাবে ক্লাউডে সংরক্ষণ করা হয়েছে!', 'success');
+    } catch (err: any) {
       console.error(err);
-      showToast('সেটিংস সংরক্ষণ ব্যর্থ হয়েছে।', 'error');
+      showToast('সেটিংস সংরক্ষণ ব্যর্থ হয়েছে: ' + (err?.message || 'Error'), 'error');
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -458,9 +473,9 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#060b14] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#EAF4FF] dark:bg-[#080D18] text-slate-900 dark:text-slate-100 flex flex-col transition-colors">
       {/* Admin Top Header */}
-      <div className="bg-[#09101f] border-b border-slate-800 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <div className="bg-white dark:bg-[#101B2D] border-b border-[#C7E2FF] dark:border-[#172B45] px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigateTo('home')}
@@ -521,11 +536,11 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Main Admin Body */}
       <div className="flex-1 flex flex-col md:flex-row">
-        {/* Admin Sidebar Navigation */}
-        <aside className="w-full md:w-64 bg-[#080d1a] border-r border-slate-800/90 p-4 space-y-1">
+        {/* Admin Sidebar Navigation (Optimized for Mobile & Desktop) */}
+        <aside className="w-full md:w-64 bg-white dark:bg-[#101B2D] border-r border-b md:border-b-0 border-[#C7E2FF] dark:border-[#172B45] p-2 sm:p-4 flex md:flex-col overflow-x-auto md:overflow-visible scrollbar-none gap-1.5 sm:space-y-1 flex-shrink-0">
           <button
             onClick={() => setCurrentTab('overview')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'overview'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -537,18 +552,18 @@ export const AdminDashboard: React.FC = () => {
 
           <button
             onClick={() => setCurrentTab('orders')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'orders'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <ShoppingBag className="w-4 h-4 text-cyan-400" />
               <span>সকল অর্ডার</span>
             </div>
             {pendingOrdersCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-black">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-black ml-1.5">
                 {pendingOrdersCount}
               </span>
             )}
@@ -556,18 +571,18 @@ export const AdminDashboard: React.FC = () => {
 
           <button
             onClick={() => setCurrentTab('deposits')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'deposits'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <CreditCard className="w-4 h-4 text-cyan-400" />
               <span>ডিপোজিট রিকোয়েস্ট</span>
             </div>
             {pendingDepositsCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-black">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-black ml-1.5">
                 {pendingDepositsCount}
               </span>
             )}
@@ -575,18 +590,18 @@ export const AdminDashboard: React.FC = () => {
 
           <button
             onClick={() => setCurrentTab('users')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'users'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Users className="w-4 h-4 text-cyan-400" />
               <span>ইউজার ও ওয়ালেট</span>
             </div>
             {allUsers.length > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 ml-1.5">
                 {allUsers.length}
               </span>
             )}
@@ -594,7 +609,7 @@ export const AdminDashboard: React.FC = () => {
 
           <button
             onClick={() => setCurrentTab('products')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'products'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -606,7 +621,7 @@ export const AdminDashboard: React.FC = () => {
 
           <button
             onClick={() => setCurrentTab('categories')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'categories'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -618,19 +633,19 @@ export const AdminDashboard: React.FC = () => {
 
           <button
             onClick={() => setCurrentTab('payments')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'payments'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
             <CreditCard className="w-4 h-4 text-cyan-400" />
-            <span>পেমেন্ট গেটওয়ে সেটিংস</span>
+            <span>পেমেন্ট গেটওয়ে</span>
           </button>
 
           <button
             onClick={() => setCurrentTab('settings')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'settings'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -642,18 +657,18 @@ export const AdminDashboard: React.FC = () => {
 
           <button
             onClick={() => setCurrentTab('supabase')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 md:flex-shrink md:w-full cursor-pointer ${
               currentTab === 'supabase'
                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Database className="w-4 h-4 text-emerald-400" />
               <span>সুপাবেস (Supabase)</span>
             </div>
             {supabaseQueueCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-black animate-pulse">
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-black animate-pulse ml-1.5">
                 {supabaseQueueCount}
               </span>
             )}
@@ -1805,114 +1820,835 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 6: SITE SETTINGS */}
+          {/* TAB 6: SITE & CONTENT SETTINGS (EXPANDED ACCESSIBILITY & CONTROLS) */}
           {currentTab === 'settings' && (
-            <div className="max-w-3xl space-y-6">
-              <div>
-                <h2 className="font-heading font-black text-2xl text-white">
-                  সাইট ও কন্টেন্ট সেটিংস
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  হেডলাইন, ব্যানারের লেখা এবং কন্টাক্ট ইনফরমেশন পরিবর্তন করুন
-                </p>
-              </div>
-
-              <form onSubmit={handleSaveSettings} className="space-y-4">
-                <div className="p-6 rounded-2xl bg-[#0a1122] border border-slate-800 space-y-4">
-                  <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">
-                      স্টোরের নাম (Store Name)
-                    </label>
-                    <input
-                      type="text"
-                      value={settingsForm.storeName}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, storeName: e.target.value })}
-                      className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">
-                      হিরো টপ ব্যাজ
-                    </label>
-                    <input
-                      type="text"
-                      value={settingsForm.heroBadge}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, heroBadge: e.target.value })}
-                      className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
-                        হিরো টাইটেল (লাইন ১)
-                      </label>
-                      <input
-                        type="text"
-                        value={settingsForm.heroTitle}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, heroTitle: e.target.value })}
-                        className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
-                        হিরো টাইটেল হাইলাইট (লাইন ২)
-                      </label>
-                      <input
-                        type="text"
-                        value={settingsForm.heroTitleHighlight}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, heroTitleHighlight: e.target.value })}
-                        className="w-full bg-[#0d1629] text-sm text-cyan-400 px-3 py-2 rounded-xl border border-slate-700"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">
-                      হিরো সাবটাইটেল
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={settingsForm.heroSubtitle}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, heroSubtitle: e.target.value })}
-                      className="w-full bg-[#0d1629] text-xs text-white p-3 rounded-xl border border-slate-700"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
-                        হোয়াটসঅ্যাপ সাপোর্ট
-                      </label>
-                      <input
-                        type="text"
-                        value={settingsForm.supportWhatsapp}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, supportWhatsapp: e.target.value })}
-                        className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">
-                        সাপোর্ট ইমেইল
-                      </label>
-                      <input
-                        type="text"
-                        value={settingsForm.supportEmail}
-                        onChange={(e) => setSettingsForm({ ...settingsForm, supportEmail: e.target.value })}
-                        className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
-                      />
-                    </div>
-                  </div>
+            <div className="space-y-6 max-w-4xl">
+              {/* Header with Quick Actions */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                <div>
+                  <h2 className="font-heading font-black text-2xl text-white flex items-center gap-2.5">
+                    <Sliders className="w-6 h-6 text-cyan-400" />
+                    <span>সাইট ও কন্টেন্ট সেটিংস (সম্পূর্ণ নিয়ন্ত্রণ)</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    ব্যানার, হিরো সেকশন, অ্যাকশন বাটন, কাস্টমার হেল্পডেস্ক, ট্রাস্ট ব্যাজ ও পলিসিসমূহ এখান থেকে নিয়ন্ত্রণ করুন।
+                  </p>
                 </div>
 
-                <button
-                  type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-semibold text-xs flex items-center gap-2 shadow-lg"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>সাইট সেটিংস সেভ করুন</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm('আপনি কি ডিফল্ট সেটিংস রিস্টোর করতে চান?')) {
+                        setSettingsForm(initialSiteSettings);
+                        showToast('ডিফল্ট সেটিংস লোড করা হয়েছে। সেভ করতে বাটন চাপুন।', 'info');
+                      }
+                    }}
+                    className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium border border-slate-700/80 transition-colors cursor-pointer"
+                  >
+                    ডিফল্ট রিস্টোর
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSaveSettings()}
+                    disabled={isSavingSettings}
+                    className="px-5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-bold text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSavingSettings ? (
+                      <RefreshCw className="w-4 h-4 animate-spin text-black" />
+                    ) : (
+                      <Save className="w-4 h-4 text-black" />
+                    )}
+                    <span>{isSavingSettings ? 'সংরক্ষণ হচ্ছে...' : 'সেটিংস সেভ করুন'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-Tabs Navigation for Ultra-Organized Accessibility */}
+              <div className="flex flex-wrap gap-1.5 p-1.5 rounded-2xl bg-[#09101f] border border-slate-800 text-xs">
+                {[
+                  { id: 'banner', label: '📢 ব্যানার ও নোটিশ', icon: Bell },
+                  { id: 'hero', label: '⚡ হিরো ও বাটন', icon: Sparkles },
+                  { id: 'support', label: '🎧 সাপোর্ট হেল্পডেস্ক', icon: Headphones },
+                  { id: 'trust', label: '🛡️ ট্রাস্ট ব্যাজ', icon: Shield },
+                  { id: 'general', label: '🏢 স্টোর ও লিমিট', icon: Settings },
+                  { id: 'social', label: '🌐 সোশ্যাল মিডিয়া', icon: Share2 },
+                  { id: 'footer', label: '📜 ফুটার ও পলিসি', icon: Globe },
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = settingsSubTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setSettingsSubTab(tab.id as any)}
+                      className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleSaveSettings} className="space-y-6">
+                {/* 1. ANNOUNCEMENT BANNER */}
+                {settingsSubTab === 'banner' && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <div className="p-6 rounded-2xl bg-[#0a1122] border border-slate-800 space-y-5">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+                        <div>
+                          <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                            <Bell className="w-4 h-4 text-cyan-400" />
+                            <span>টপ নোটিশ ও অ্যানাউন্সমেন্ট বার</span>
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-0.5">
+                            ওয়েবসাইটের একদম উপরে জরুরি বার্তা বা অফার প্রদর্শন করুন
+                          </p>
+                        </div>
+
+                        {/* Toggle Switch */}
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={settingsForm.announcementEnabled !== false}
+                            onChange={(e) =>
+                              setSettingsForm({
+                                ...settingsForm,
+                                announcementEnabled: e.target.checked,
+                              })
+                            }
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                          <span className="ml-2.5 text-xs font-semibold text-slate-200">
+                            {settingsForm.announcementEnabled !== false ? 'চালু আছে' : 'বন্ধ আছে'}
+                          </span>
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            ব্যানার ব্যাজ টেক্সট
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.announcementBadge || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, announcementBadge: e.target.value })
+                            }
+                            placeholder="যেমন: জরুরি নোটিশ / অফার"
+                            className="w-full bg-[#0d1629] text-xs text-white px-3 py-2.5 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            ব্যানার নোটিশ মেসেজ (Notice Text)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.announcement || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, announcement: e.target.value })
+                            }
+                            placeholder="যেমন: ⚡ ইনস্ট্যান্ট ডেলিভারি চালু আছে! বিকাশ, নগদ ও রকেটে দ্রুত পেমেন্ট সুবিধা।"
+                            className="w-full bg-[#0d1629] text-xs text-white px-3 py-2.5 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Live Preview */}
+                      <div className="pt-3 border-t border-slate-800/60">
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                          লাইভ প্রিভিউ (গ্রাহক যেভাবে দেখবে):
+                        </span>
+                        {settingsForm.announcementEnabled !== false ? (
+                          <div className="bg-gradient-to-r from-cyan-950 via-[#0a1b2d] to-blue-950 border border-cyan-800/40 text-cyan-200 text-xs py-2 px-4 rounded-xl flex items-center justify-between gap-3 shadow-inner">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 font-bold text-[10px] uppercase">
+                                {settingsForm.announcementBadge || 'জরুরি নোটিশ'}
+                              </span>
+                              <span className="truncate text-slate-200 text-xs">
+                                {settingsForm.announcement || 'কোনো নোটিশ সেট করা নেই'}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800">
+                              লাইভ সাপোর্ট
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-500 text-center">
+                            ব্যানারটি বর্তমানে বন্ধ করা রয়েছে। ওয়েবসাইটে প্রদর্শিত হবে না।
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. HERO SECTION & CTAS */}
+                {settingsSubTab === 'hero' && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <div className="p-6 rounded-2xl bg-[#0a1122] border border-slate-800 space-y-4">
+                      <h3 className="font-bold text-sm text-white flex items-center gap-2 pb-2 border-b border-slate-800/80">
+                        <Sparkles className="w-4 h-4 text-cyan-400" />
+                        <span>হিরো সেকশন ও টাইটেল কনফিগারেশন</span>
+                      </h3>
+
+                      <div>
+                        <label className="text-xs font-medium text-slate-300 block mb-1">
+                          হিরো টপ ব্যাজ (Top Badge)
+                        </label>
+                        <input
+                          type="text"
+                          value={settingsForm.heroBadge}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, heroBadge: e.target.value })
+                          }
+                          className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            হিরো টাইটেল (লাইন ১)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.heroTitle}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, heroTitle: e.target.value })
+                            }
+                            className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            হিরো টাইটেল হাইলাইট (লাইন ২ - সিয়ান কালার)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.heroTitleHighlight}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, heroTitleHighlight: e.target.value })
+                            }
+                            className="w-full bg-[#0d1629] text-sm text-cyan-400 font-bold px-3 py-2 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-medium text-slate-300 block mb-1">
+                          হিরো সাবটাইটেল ডেসক্রিপশন
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={settingsForm.heroSubtitle}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, heroSubtitle: e.target.value })
+                          }
+                          className="w-full bg-[#0d1629] text-xs text-white p-3 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none leading-relaxed"
+                        />
+                      </div>
+
+                      {/* Action Buttons Setup */}
+                      <div className="pt-4 border-t border-slate-800 space-y-4">
+                        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                          হিরো অ্যাকশন বাটন কন্ট্রোল:
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="p-4 rounded-xl bg-[#09101f] border border-slate-800/80 space-y-2">
+                            <span className="text-xs font-bold text-cyan-400">বাটন ১ (প্রাইমারি)</span>
+                            <div>
+                              <label className="text-[11px] text-slate-400 block mb-1">বাটন টেক্সট</label>
+                              <input
+                                type="text"
+                                value={settingsForm.heroCta1Text || ''}
+                                onChange={(e) =>
+                                  setSettingsForm({ ...settingsForm, heroCta1Text: e.target.value })
+                                }
+                                placeholder="টপ-আপ করুন"
+                                className="w-full bg-[#0d1629] text-xs text-white px-2.5 py-1.5 rounded-lg border border-slate-700"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[11px] text-slate-400 block mb-1">টার্গেট স্লাগ</label>
+                              <input
+                                type="text"
+                                value={settingsForm.heroCta1Link || ''}
+                                onChange={(e) =>
+                                  setSettingsForm({ ...settingsForm, heroCta1Link: e.target.value })
+                                }
+                                placeholder="game-top-up"
+                                className="w-full bg-[#0d1629] text-xs font-mono text-cyan-300 px-2.5 py-1.5 rounded-lg border border-slate-700"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="p-4 rounded-xl bg-[#09101f] border border-slate-800/80 space-y-2">
+                            <span className="text-xs font-bold text-slate-300">বাটন ২ (সেকেন্ডারি)</span>
+                            <div>
+                              <label className="text-[11px] text-slate-400 block mb-1">বাটন টেক্সট</label>
+                              <input
+                                type="text"
+                                value={settingsForm.heroCta2Text || ''}
+                                onChange={(e) =>
+                                  setSettingsForm({ ...settingsForm, heroCta2Text: e.target.value })
+                                }
+                                placeholder="গিফট কার্ড কিনুন"
+                                className="w-full bg-[#0d1629] text-xs text-white px-2.5 py-1.5 rounded-lg border border-slate-700"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[11px] text-slate-400 block mb-1">টার্গেট স্লাগ</label>
+                              <input
+                                type="text"
+                                value={settingsForm.heroCta2Link || ''}
+                                onChange={(e) =>
+                                  setSettingsForm({ ...settingsForm, heroCta2Link: e.target.value })
+                                }
+                                placeholder="digital-cards"
+                                className="w-full bg-[#0d1629] text-xs font-mono text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="p-4 rounded-xl bg-[#09101f] border border-slate-800/80 space-y-2 sm:col-span-2">
+                            <span className="text-xs font-bold text-cyan-300">বাটন ৩ (অ্যাকশন / ট্র্যাকিং বাটন)</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="text-[11px] text-slate-400 block mb-1">বাটন টেক্সট</label>
+                                <input
+                                  type="text"
+                                  value={settingsForm.heroCta3Text || ''}
+                                  onChange={(e) =>
+                                    setSettingsForm({ ...settingsForm, heroCta3Text: e.target.value })
+                                  }
+                                  placeholder="অর্ডার ট্র্যাক করুন"
+                                  className="w-full bg-[#0d1629] text-xs text-white px-2.5 py-1.5 rounded-lg border border-slate-700"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] text-slate-400 block mb-1">টার্গেট পেজ / স্লাগ</label>
+                                <input
+                                  type="text"
+                                  value={settingsForm.heroCta3Link || ''}
+                                  onChange={(e) =>
+                                    setSettingsForm({ ...settingsForm, heroCta3Link: e.target.value })
+                                  }
+                                  placeholder="track-order"
+                                  className="w-full bg-[#0d1629] text-xs font-mono text-cyan-300 px-2.5 py-1.5 rounded-lg border border-slate-700"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Homepage Section Headings */}
+                        <div className="pt-4 border-t border-slate-800 space-y-3">
+                          <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                            হোমপেজ সেকশন শিরোনাম ও সাবটাইটেল:
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-3.5 rounded-xl bg-[#09101f] border border-slate-800/80 space-y-2">
+                              <span className="text-xs font-bold text-amber-400">জনপ্রিয় প্রোডাক্ট সেকশন</span>
+                              <div>
+                                <label className="text-[11px] text-slate-400 block mb-1">টাইটেল</label>
+                                <input
+                                  type="text"
+                                  value={settingsForm.popularSectionTitle || ''}
+                                  onChange={(e) =>
+                                    setSettingsForm({ ...settingsForm, popularSectionTitle: e.target.value })
+                                  }
+                                  placeholder="জনপ্রিয় প্রোডাক্ট ও অফার"
+                                  className="w-full bg-[#0d1629] text-xs text-white px-2.5 py-1.5 rounded-lg border border-slate-700"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] text-slate-400 block mb-1">সাবটাইটেল</label>
+                                <input
+                                  type="text"
+                                  value={settingsForm.popularSectionSubtitle || ''}
+                                  onChange={(e) =>
+                                    setSettingsForm({ ...settingsForm, popularSectionSubtitle: e.target.value })
+                                  }
+                                  placeholder="সবচেয়ে বেশি ক্রয়কৃত টপআপ ও ডিজিটাল ভাউচার"
+                                  className="w-full bg-[#0d1629] text-xs text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="p-3.5 rounded-xl bg-[#09101f] border border-slate-800/80 space-y-2">
+                              <span className="text-xs font-bold text-cyan-400">ডিজিটাল গিফট কার্ড সেকশন</span>
+                              <div>
+                                <label className="text-[11px] text-slate-400 block mb-1">টাইটেল</label>
+                                <input
+                                  type="text"
+                                  value={settingsForm.giftCardSectionTitle || ''}
+                                  onChange={(e) =>
+                                    setSettingsForm({ ...settingsForm, giftCardSectionTitle: e.target.value })
+                                  }
+                                  placeholder="ডিজিটাল গিফট কার্ড ও রিডিম কোড"
+                                  className="w-full bg-[#0d1629] text-xs text-white px-2.5 py-1.5 rounded-lg border border-slate-700"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[11px] text-slate-400 block mb-1">সাবটাইটেল</label>
+                                <input
+                                  type="text"
+                                  value={settingsForm.giftCardSectionSubtitle || ''}
+                                  onChange={(e) =>
+                                    setSettingsForm({ ...settingsForm, giftCardSectionSubtitle: e.target.value })
+                                  }
+                                  placeholder="স্টিম, গুগল প্লে, অ্যাপল ও অন্যান্য অফিশিয়াল ভাউচার"
+                                  className="w-full bg-[#0d1629] text-xs text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. CUSTOMER SUPPORT & HELPLINE */}
+                {settingsSubTab === 'support' && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <div className="p-6 rounded-2xl bg-[#0a1122] border border-slate-800 space-y-4">
+                      <h3 className="font-bold text-sm text-white flex items-center gap-2 pb-2 border-b border-slate-800/80">
+                        <Headphones className="w-4 h-4 text-emerald-400" />
+                        <span>কাস্টমার সাপোর্ট ও হেল্পডেস্ক চ্যানেলসমূহ</span>
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        এখানে দেওয়া চ্যানেলগুলো সাইটের ফ্লোটিং সাপোর্ট উইজেট, ফুটার এবং নেভবারে স্বয়ংক্রিয়ভাবে কার্যকর হবে।
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            হোয়াটসঅ্যাপ সাপোর্ট নম্বর (WhatsApp)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.supportWhatsapp}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, supportWhatsapp: e.target.value })
+                            }
+                            placeholder="+8801788992211"
+                            className="w-full bg-[#0d1629] text-sm text-emerald-400 font-mono font-bold px-3 py-2 rounded-xl border border-slate-700 focus:border-emerald-400 focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            টেলিগ্রাম ইউজারনেম (Telegram Support)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.supportTelegram || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, supportTelegram: e.target.value })
+                            }
+                            placeholder="@superstorez_support"
+                            className="w-full bg-[#0d1629] text-sm text-cyan-400 font-mono font-bold px-3 py-2 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            সাপোর্ট অফিসিয়াল ইমেইল (Email)
+                          </label>
+                          <input
+                            type="email"
+                            value={settingsForm.supportEmail}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, supportEmail: e.target.value })
+                            }
+                            placeholder="support@superstorez.com"
+                            className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            সাপোর্ট হেল্পলাইন আওয়ার্স (Service Hours)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.supportHours || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, supportHours: e.target.value })
+                            }
+                            placeholder="প্রতিদিন সকাল ০৯:০০ - রাত ০১:০০"
+                            className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-medium text-slate-300 block mb-1">
+                          সাপোর্ট ডেস্কে প্রদর্শিত জরুরি সহায়তা বার্তা (Support Notice)
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={settingsForm.supportNotice || ''}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, supportNotice: e.target.value })
+                          }
+                          placeholder="যেকোনো সহায়তায় আমাদের হোয়াটসঅ্যাপ বা টেলিগ্রামে সরাসরি মেসেজ দিন, তাৎক্ষণিক সমাধান দেওয়া হবে।"
+                          className="w-full bg-[#0d1629] text-xs text-white p-3 rounded-xl border border-slate-700 focus:border-cyan-400 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. TRUST BADGES */}
+                {settingsSubTab === 'trust' && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <div className="p-6 rounded-2xl bg-[#0a1122] border border-slate-800 space-y-4">
+                      <h3 className="font-bold text-sm text-white flex items-center gap-2 pb-2 border-b border-slate-800/80">
+                        <Shield className="w-4 h-4 text-cyan-400" />
+                        <span>ট্রাস্ট ব্যাজ ও গ্রাহক নিরাপত্তা বার্তা</span>
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        হিরো সেকশনের নিচে ও ফুটারের প্রধান ৩টি আস্থার প্রতীক ও টেক্সট কাস্টমাইজ করুন।
+                      </p>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            ট্রাস্ট ফিচার ১ (ডেলিভারি সংক্রান্ত)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.trustBadge1 || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, trustBadge1: e.target.value })
+                            }
+                            placeholder="১-৫ মিনিটে ইনস্ট্যান্ট অটো ডেলিভারি"
+                            className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            ট্রাস্ট ফিচার ২ (গেটওয়ে ও সিকিউরিটি সংক্রান্ত)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.trustBadge2 || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, trustBadge2: e.target.value })
+                            }
+                            placeholder="১০০% অফিশিয়াল ও নিরাপদ গেটওয়ে"
+                            className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            ট্রাস্ট ফিচার ৩ (গ্রাহক সেবা সংক্রান্ত)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.trustBadge3 || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, trustBadge3: e.target.value })
+                            }
+                            placeholder="২৪/৭ লাইভ গ্রাহক সেবা"
+                            className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. STORE & DEPOSIT LIMITS */}
+                {settingsSubTab === 'general' && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <div className="p-6 rounded-2xl bg-[#0a1122] border border-slate-800 space-y-4">
+                      <h3 className="font-bold text-sm text-white flex items-center gap-2 pb-2 border-b border-slate-800/80">
+                        <Settings className="w-4 h-4 text-cyan-400" />
+                        <span>স্টোর ব্র্যান্ডিং ও ডিপোজিট লিমিট</span>
+                      </h3>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            স্টোরের নাম (Store Name)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.storeName}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, storeName: e.target.value })
+                            }
+                            className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            স্টোর ট্যাগলাইন (Tagline)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.tagline || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, tagline: e.target.value })
+                            }
+                            placeholder="বাংলাদেশের বিশ্বস্ত গেমিং ও ইনস্ট্যান্ট টপআপ মার্কেটপ্লেস"
+                            className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            সর্বনিম্ন ডিপোজিট সীমা (Min Deposit Limit)
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              min="1"
+                              value={settingsForm.minDepositAmount ?? 50}
+                              onChange={(e) =>
+                                setSettingsForm({
+                                  ...settingsForm,
+                                  minDepositAmount: Math.max(1, parseInt(e.target.value) || 0),
+                                })
+                              }
+                              className="w-full bg-[#0d1629] text-sm text-cyan-400 font-mono font-bold px-3 py-2 rounded-xl border border-slate-700"
+                            />
+                            <span className="absolute right-3 top-2 text-xs text-slate-400">টাকা (৳)</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            কারেন্সি চিহ্ন (Currency Symbol)
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.currencySymbol || '৳'}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, currencySymbol: e.target.value })
+                            }
+                            className="w-full bg-[#0d1629] text-sm text-white font-bold px-3 py-2 rounded-xl border border-slate-700"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            লোগো ইমেজ ইউআরএল (Logo Image URL - ঐচ্ছিক)
+                          </label>
+                          <input
+                            type="url"
+                            value={settingsForm.logoUrl || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, logoUrl: e.target.value })
+                            }
+                            placeholder="https://yourdomain.com/logo.png (খালি রাখলে টেক্সট লোগো দেখাবে)"
+                            className="w-full bg-[#0d1629] text-xs text-white px-3 py-2 rounded-xl border border-slate-700"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            চেকআউট সিকিউরিটি ব্যাজ টেক্সট
+                          </label>
+                          <input
+                            type="text"
+                            value={settingsForm.securityBadgeNote || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, securityBadgeNote: e.target.value })
+                            }
+                            placeholder="১০০% নিরাপদ ও এনক্রিপ্টেড পেমেন্ট গেটওয়ে।"
+                            className="w-full bg-[#0d1629] text-xs text-white px-3 py-2 rounded-xl border border-slate-700"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Payment Notes */}
+                      <div className="pt-4 border-t border-slate-800 space-y-3">
+                        <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                          পেমেন্ট গেটওয়ে নির্দেশনা ও শর্ট নোট:
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div>
+                            <label className="text-[11px] text-pink-400 font-bold block mb-1">বিকাশ নোট</label>
+                            <input
+                              type="text"
+                              value={settingsForm.bkashHelpNote || ''}
+                              onChange={(e) =>
+                                setSettingsForm({ ...settingsForm, bkashHelpNote: e.target.value })
+                              }
+                              placeholder="বিকাশ অ্যাপ থেকে Send Money..."
+                              className="w-full bg-[#0d1629] text-xs text-white px-2.5 py-1.5 rounded-lg border border-slate-700"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] text-orange-400 font-bold block mb-1">নগদ নোট</label>
+                            <input
+                              type="text"
+                              value={settingsForm.nagadHelpNote || ''}
+                              onChange={(e) =>
+                                setSettingsForm({ ...settingsForm, nagadHelpNote: e.target.value })
+                              }
+                              placeholder="নগদ অ্যাপ বা *167# ডায়াল..."
+                              className="w-full bg-[#0d1629] text-xs text-white px-2.5 py-1.5 rounded-lg border border-slate-700"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] text-purple-400 font-bold block mb-1">রকেট নোট</label>
+                            <input
+                              type="text"
+                              value={settingsForm.rocketHelpNote || ''}
+                              onChange={(e) =>
+                                setSettingsForm({ ...settingsForm, rocketHelpNote: e.target.value })
+                              }
+                              placeholder="রকেট অ্যাপ বা *322# ডায়াল..."
+                              className="w-full bg-[#0d1629] text-xs text-white px-2.5 py-1.5 rounded-lg border border-slate-700"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. SOCIAL MEDIA LINKS */}
+                {settingsSubTab === 'social' && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <div className="p-6 rounded-2xl bg-[#0a1122] border border-slate-800 space-y-4">
+                      <h3 className="font-bold text-sm text-white flex items-center gap-2 pb-2 border-b border-slate-800/80">
+                        <Share2 className="w-4 h-4 text-cyan-400" />
+                        <span>সোশ্যাল মিডিয়া ও কমিউনিটি চ্যানেলস</span>
+                      </h3>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            ফেসবুক পেজ ইউআরএল (Facebook Page)
+                          </label>
+                          <input
+                            type="url"
+                            value={settingsForm.facebookPageUrl || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, facebookPageUrl: e.target.value })
+                            }
+                            placeholder="https://facebook.com/yourpage"
+                            className="w-full bg-[#0d1629] text-xs text-white px-3 py-2.5 rounded-xl border border-slate-700"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            ইউটিউব চ্যানেল ইউআরএল (YouTube)
+                          </label>
+                          <input
+                            type="url"
+                            value={settingsForm.youtubeChannelUrl || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, youtubeChannelUrl: e.target.value })
+                            }
+                            placeholder="https://youtube.com/@yourchannel"
+                            className="w-full bg-[#0d1629] text-xs text-white px-3 py-2.5 rounded-xl border border-slate-700"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-slate-300 block mb-1">
+                            ডিসকর্ড সার্ভার ইনভাইট (Discord)
+                          </label>
+                          <input
+                            type="url"
+                            value={settingsForm.discordCommunityUrl || ''}
+                            onChange={(e) =>
+                              setSettingsForm({ ...settingsForm, discordCommunityUrl: e.target.value })
+                            }
+                            placeholder="https://discord.gg/yourserver"
+                            className="w-full bg-[#0d1629] text-xs text-white px-3 py-2.5 rounded-xl border border-slate-700"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. FOOTER & POLICIES */}
+                {settingsSubTab === 'footer' && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <div className="p-6 rounded-2xl bg-[#0a1122] border border-slate-800 space-y-4">
+                      <h3 className="font-bold text-sm text-white flex items-center gap-2 pb-2 border-b border-slate-800/80">
+                        <Globe className="w-4 h-4 text-cyan-400" />
+                        <span>ফুটার টেক্সট ও কপিরাইট</span>
+                      </h3>
+
+                      <div>
+                        <label className="text-xs font-medium text-slate-300 block mb-1">
+                          ফুটার স্টোর বিবরণ (Footer Brand Description)
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={settingsForm.footerText}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, footerText: e.target.value })
+                          }
+                          className="w-full bg-[#0d1629] text-xs text-white p-3 rounded-xl border border-slate-700 leading-relaxed"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-medium text-slate-300 block mb-1">
+                          কপিরাইট লাইন (Copyright Text)
+                        </label>
+                        <input
+                          type="text"
+                          value={settingsForm.copyrightText || ''}
+                          onChange={(e) =>
+                            setSettingsForm({ ...settingsForm, copyrightText: e.target.value })
+                          }
+                          placeholder="© 2026 SuperStorez.com. সর্বস্বত্ব সংরক্ষিত।"
+                          className="w-full bg-[#0d1629] text-sm text-white px-3 py-2 rounded-xl border border-slate-700"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom Sticky-Save Bar */}
+                <div className="sticky bottom-4 z-20 p-4 rounded-2xl bg-[#080d1a]/95 border border-cyan-800/60 backdrop-blur-md flex items-center justify-between shadow-2xl">
+                  <div className="flex items-center gap-2 text-xs text-slate-300">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                    <span>যেকোনো পরিবর্তন করার পর অবশ্যই সেভ করুন</span>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSavingSettings}
+                    className="px-6 py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-black text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/25 transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSavingSettings ? (
+                      <RefreshCw className="w-4 h-4 animate-spin text-black" />
+                    ) : (
+                      <Save className="w-4 h-4 text-black" />
+                    )}
+                    <span>{isSavingSettings ? 'সংরক্ষণ হচ্ছে...' : 'সেটিংস সেভ করুন'}</span>
+                  </button>
+                </div>
               </form>
             </div>
           )}

@@ -14,6 +14,7 @@ export const translations = {
   nav_login: { bn: 'লগইন / সাইন ইন', en: 'Login / Sign In' },
   nav_deposit_btn: { bn: 'টাকা ডিপোজিট করুন', en: 'Deposit Money' },
   nav_my_account: { bn: 'আমার একাউন্ট ও অর্ডার', en: 'My Account & Orders' },
+  nav_wallet_history: { bn: 'ওয়ালেট ব্যালেন্স ও লেনদেন', en: 'Wallet Balance & History' },
   nav_live_tracker: { bn: 'অর্ডার লাইভ ট্র্যাকার', en: 'Order Live Tracker' },
   nav_admin_panel: { bn: 'এডমিন প্যানেল', en: 'Admin Panel' },
   nav_logout: { bn: 'লগআউট করুন', en: 'Logout' },

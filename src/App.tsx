@@ -17,6 +17,7 @@ import { AccountPage } from './pages/AccountPage';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminSecurityGate } from './components/AdminSecurityGate';
 import { AuthModal } from './components/AuthModal';
+import { SupportWidget } from './components/SupportWidget';
 
 const AppContent: React.FC = () => {
   const { currentPage } = useStore();
@@ -46,7 +47,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen bg-[#060b15] text-slate-100 flex flex-col transition-colors duration-200 ${
+      className={`min-h-screen bg-[#EAF4FF] dark:bg-[#080D18] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200 ${
         language === 'bn' ? 'font-bengali' : 'font-sans'
       }`}
     >
@@ -72,6 +73,9 @@ const AppContent: React.FC = () => {
 
       {/* Toast System */}
       <ToastContainer />
+
+      {/* Floating 24/7 Support Desk Widget & FAQ Modal */}
+      <SupportWidget />
 
       {/* Auth Modal for Email & Google Sign-In */}
       <AuthModal />

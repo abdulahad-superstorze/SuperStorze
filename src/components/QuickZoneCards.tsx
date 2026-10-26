@@ -13,8 +13,8 @@ export const QuickZoneCards: React.FC = () => {
       title: isBangla ? 'গেম টপআপ' : 'Game Top-Up',
       subtitle: isBangla ? 'Free Fire, PUBG, MLBB, Valorant' : 'Free Fire, PUBG, MLBB, Valorant',
       icon: Zap,
-      iconColor: 'text-cyan-400',
-      iconBg: 'bg-cyan-950/60 border-cyan-800/60',
+      iconColor: 'text-[#2563EB] dark:text-cyan-400',
+      iconBg: 'bg-[#EAF4FF] dark:bg-[#172B45] border-[#C7E2FF] dark:border-[#1f3a5e]',
       onClick: () => navigateTo('catalog', { categorySlug: 'game-top-up' }),
     },
     {
@@ -22,8 +22,8 @@ export const QuickZoneCards: React.FC = () => {
       title: isBangla ? 'গিফট কার্ড ও কি' : 'Gift Cards & Keys',
       subtitle: isBangla ? 'Steam, Google Play, Apple, Win 11' : 'Steam, Google Play, Apple, Win 11',
       icon: Shield,
-      iconColor: 'text-purple-400',
-      iconBg: 'bg-purple-950/60 border-purple-800/60',
+      iconColor: 'text-purple-600 dark:text-purple-400',
+      iconBg: 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800/60',
       onClick: () => navigateTo('catalog', { categorySlug: 'digital-cards' }),
     },
     {
@@ -32,8 +32,8 @@ export const QuickZoneCards: React.FC = () => {
       title: isBangla ? 'অর্ডার ট্র্যাকার' : 'Order Tracker',
       subtitle: isBangla ? 'অর্ডার নম্বর দিয়ে লাইভ স্ট্যাটাস দেখুন' : 'Check real-time delivery status',
       icon: Clock,
-      iconColor: 'text-cyan-400',
-      iconBg: 'bg-cyan-950/60 border-cyan-800/60',
+      iconColor: 'text-[#2563EB] dark:text-cyan-400',
+      iconBg: 'bg-[#EAF4FF] dark:bg-[#172B45] border-[#C7E2FF] dark:border-[#1f3a5e]',
       onClick: () => navigateTo('track-order'),
     },
   ];
@@ -47,21 +47,21 @@ export const QuickZoneCards: React.FC = () => {
             <div
               key={idx}
               onClick={zone.onClick}
-              className="cursor-pointer group relative rounded-2xl bg-gradient-to-b from-[#0d1629] to-[#09101e] border border-slate-800/90 hover:border-cyan-500/50 p-5 transition-all duration-200 hover:-translate-y-1 shadow-lg hover:shadow-cyan-500/10 flex items-center justify-between"
+              className="quick-zone-card cursor-pointer group relative rounded-2xl bg-white dark:bg-[#101B2D] border border-[#C7E2FF] dark:border-[#172B45] hover:border-[#6BA8F5] dark:hover:border-cyan-500/50 p-5 transition-all duration-200 hover:-translate-y-1 shadow-sm hover:shadow-md flex items-center justify-between"
             >
               <div>
                 <div className="flex items-center gap-1.5 mb-1.5">
                   {zone.tagDot && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#6BA8F5] dark:bg-cyan-400 animate-pulse" />
                   )}
-                  <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider">
+                  <span className="text-[11px] font-bold text-[#2563EB] dark:text-cyan-400 uppercase tracking-wider">
                     {zone.tag}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#2563EB] dark:group-hover:text-cyan-400 transition-colors">
                   {zone.title}
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">{zone.subtitle}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{zone.subtitle}</p>
               </div>
 
               <div

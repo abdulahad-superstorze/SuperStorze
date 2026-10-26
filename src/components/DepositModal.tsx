@@ -170,8 +170,13 @@ function compressImage(file: File, maxWidth = 800, quality = 0.75): Promise<stri
     }
 
     const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount < 20) {
-      setErrorMsg(isBangla ? 'সর্বনিম্ন ডিপোজিট পরিমাণ ৳ ২০ টাকা।' : 'Minimum deposit amount is ৳ 20.');
+    const minAllowed = siteSettings.minDepositAmount || 20;
+    if (isNaN(numAmount) || numAmount < minAllowed) {
+      setErrorMsg(
+        isBangla
+          ? `সর্বনিম্ন ডিপোজিট পরিমাণ ৳ ${minAllowed} টাকা।`
+          : `Minimum deposit amount is ৳ ${minAllowed}.`
+      );
       return;
     }
 

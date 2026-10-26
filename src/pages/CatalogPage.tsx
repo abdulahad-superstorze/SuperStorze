@@ -45,9 +45,9 @@ export const CatalogPage: React.FC = () => {
       <div className="mb-4">
         <button
           onClick={() => navigateTo('home')}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#0a1122] hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-[#101B2D] hover:bg-[#EAF4FF] dark:hover:bg-[#172B45] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-[#C7E2FF] dark:border-[#172B45] text-xs font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
         >
-          <ArrowLeft className="w-4 h-4 text-cyan-400" />
+          <ArrowLeft className="w-4 h-4 text-[#2563EB] dark:text-cyan-400" />
           <span>{isBangla ? '← হোমে ফিরে যান' : '← Back to Home'}</span>
         </button>
       </div>
@@ -56,10 +56,10 @@ export const CatalogPage: React.FC = () => {
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="font-heading font-black text-2xl sm:text-3xl text-white">
+            <h1 className="font-heading font-black text-2xl sm:text-3xl text-slate-900 dark:text-white">
               {isBangla ? 'প্রোডাক্ট ক্যাটালগ ও গেম স্টোর' : 'Product Catalog & Store'}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               {isBangla
                 ? 'আপনার পছন্দের গেম টপআপ ও ডিজিটাল কার্ড বেছে নিন'
                 : 'Browse all game top-ups, gift cards and subscriptions'}
@@ -74,12 +74,12 @@ export const CatalogPage: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={isBangla ? 'গেম বা কার্ড খুঁজুন...' : 'Search games or cards...'}
-              className="w-full bg-[#0d1629] text-sm text-slate-200 placeholder:text-slate-400 pl-10 pr-9 py-2.5 rounded-xl border border-slate-700/80 focus:outline-none focus:border-cyan-500 transition-all"
+              className="w-full bg-white dark:bg-[#172B45] text-sm text-slate-900 dark:text-slate-200 placeholder:text-slate-400 pl-10 pr-9 py-2.5 rounded-xl border border-[#C7E2FF] dark:border-[#172B45] focus:outline-none focus:border-[#6BA8F5] dark:focus:border-cyan-500 transition-all shadow-sm"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -88,15 +88,15 @@ export const CatalogPage: React.FC = () => {
         </div>
 
         {/* Filter and Sort Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-[#0a1122] border border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-white dark:bg-[#101B2D] border border-[#C7E2FF] dark:border-[#172B45] shadow-sm">
           {/* Category Tabs */}
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={() => setActiveCategory('all')}
-              className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+              className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                 activeCategory === 'all'
-                  ? 'bg-cyan-500 text-black font-semibold shadow-md shadow-cyan-500/20'
-                  : 'bg-slate-900/60 text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-800'
+                  ? 'bg-[#6BA8F5] dark:bg-cyan-500 text-white dark:text-black shadow-sm'
+                  : 'bg-[#EAF4FF] dark:bg-[#172B45] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#C7E2FF] dark:hover:bg-[#1f3a5e] border border-[#C7E2FF] dark:border-[#172B45]'
               }`}
             >
               {isBangla
@@ -108,10 +108,10 @@ export const CatalogPage: React.FC = () => {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+                className={`px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeCategory === cat.id
-                    ? 'bg-cyan-500 text-black font-semibold shadow-md shadow-cyan-500/20'
-                    : 'bg-slate-900/60 text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-800'
+                    ? 'bg-[#6BA8F5] dark:bg-cyan-500 text-white dark:text-black shadow-sm'
+                    : 'bg-[#EAF4FF] dark:bg-[#172B45] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-[#C7E2FF] dark:hover:bg-[#1f3a5e] border border-[#C7E2FF] dark:border-[#172B45]'
                 }`}
               >
                 {isBangla ? (cat.nameBn || cat.name) : cat.name}
@@ -119,18 +119,19 @@ export const CatalogPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-2">
+          {/* Sort By Dropdown */}
+          <div className="flex items-center gap-2 text-xs">
             <SlidersHorizontal className="w-4 h-4 text-slate-400" />
+            <span className="text-slate-500 dark:text-slate-400">{isBangla ? 'সাজান:' : 'Sort:'}</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-slate-900 text-xs sm:text-sm text-slate-300 border border-slate-800 rounded-xl px-3 py-1.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
+              className="bg-[#EAF4FF] dark:bg-[#172B45] text-slate-800 dark:text-slate-200 text-xs rounded-xl px-2.5 py-1.5 border border-[#C7E2FF] dark:border-[#172B45] focus:outline-none cursor-pointer"
             >
-              <option value="popular">{isBangla ? 'জনপ্রিয়তা অনুসারে' : 'Most Popular'}</option>
-              <option value="price-low">{isBangla ? 'মূল্য: কম থেকে বেশি' : 'Price: Low to High'}</option>
-              <option value="price-high">{isBangla ? 'মূল্য: বেশি থেকে কম' : 'Price: High to Low'}</option>
-              <option value="name">{isBangla ? 'নাম অনুসারে (A-Z)' : 'Name (A-Z)'}</option>
+              <option value="popular">{isBangla ? 'জনপ্রিয়তা' : 'Most Popular'}</option>
+              <option value="price-low">{isBangla ? 'কম দাম আগে' : 'Price: Low to High'}</option>
+              <option value="price-high">{isBangla ? 'বেশি দাম আগে' : 'Price: High to Low'}</option>
+              <option value="name">{isBangla ? 'নাম (A-Z)' : 'Name (A-Z)'}</option>
             </select>
           </div>
         </div>
@@ -138,30 +139,22 @@ export const CatalogPage: React.FC = () => {
 
       {/* Product Grid */}
       {filteredProducts.length === 0 ? (
-        <div className="py-20 text-center rounded-3xl bg-[#0a1120] border border-slate-800 max-w-lg mx-auto p-8">
-          <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mx-auto mb-4">
-            <Search className="w-8 h-8" />
-          </div>
-          <h3 className="font-heading font-bold text-lg text-white mb-2">
-            {isBangla ? 'কোনো প্রোডাক্ট পাওয়া যায়নি' : 'No products found'}
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-400 mb-6">
-            {isBangla
-              ? 'আপনার সার্চ ফিল্টার পরিবর্তন করুন বা অন্য কোনো গেমের নাম অনুসন্ধান করুন।'
-              : 'Try adjusting your search terms or choose a different category.'}
+        <div className="text-center py-20 bg-white dark:bg-[#101B2D] rounded-3xl border border-[#C7E2FF] dark:border-[#172B45] shadow-sm">
+          <p className="text-slate-500 dark:text-slate-400 text-base mb-2">
+            {isBangla ? 'কোনো পণ্য পাওয়া যায়নি।' : 'No products found.'}
           </p>
           <button
             onClick={() => {
               setActiveCategory('all');
               setSearchTerm('');
             }}
-            className="px-5 py-2.5 rounded-xl bg-cyan-500 text-black font-semibold text-xs sm:text-sm shadow-md cursor-pointer"
+            className="text-xs text-[#2563EB] dark:text-cyan-400 hover:underline cursor-pointer"
           >
-            {isBangla ? 'ফিল্টার রিসেট করুন' : 'Reset Filters'}
+            {isBangla ? 'সকল ফিল্টার মুছুন' : 'Clear all filters'}
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

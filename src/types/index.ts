@@ -100,22 +100,52 @@ export interface Order {
 export interface SiteSettings {
   storeName: string;
   logoUrl?: string;
+  tagline?: string;
+  currencySymbol?: string;
+  minDepositAmount?: number;
+  announcementEnabled?: boolean;
+  announcement: string;
+  announcementBadge?: string;
+  announcementLink?: string;
   heroBadge: string;
   heroTitle: string;
   heroTitleHighlight: string;
   heroSubtitle: string;
-  announcement: string;
+  heroCta1Text?: string;
+  heroCta1Link?: string;
+  heroCta2Text?: string;
+  heroCta2Link?: string;
+  heroCta3Text?: string;
+  heroCta3Link?: string;
+  popularSectionTitle?: string;
+  popularSectionSubtitle?: string;
+  giftCardSectionTitle?: string;
+  giftCardSectionSubtitle?: string;
+  trustBadge1?: string;
+  trustBadge2?: string;
+  trustBadge3?: string;
   bkashNumber: string;
   bkashType: string;
+  bkashHelpNote?: string;
   nagadNumber: string;
   nagadType: string;
+  nagadHelpNote?: string;
   rocketNumber: string;
   rocketType: string;
+  rocketHelpNote?: string;
+  securityBadgeNote?: string;
   paymentInstructions: string;
   supportPhone: string;
   supportEmail: string;
   supportWhatsapp: string;
+  supportTelegram?: string;
+  supportHours?: string;
+  supportNotice?: string;
+  facebookPageUrl?: string;
+  youtubeChannelUrl?: string;
+  discordCommunityUrl?: string;
   footerText: string;
+  copyrightText?: string;
 }
 
 export interface UserProfile {
